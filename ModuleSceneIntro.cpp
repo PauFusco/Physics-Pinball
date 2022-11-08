@@ -43,6 +43,40 @@ bool ModuleSceneIntro::Start()
 	// In ModulePhysics::PreUpdate(), we iterate over all sensors and (if colliding) we call the function ModuleSceneIntro::OnCollision()
 	lower_ground_sensor->listener = this;
 
+	b2BodyDef baseDef;
+	baseDef.position.Set(SCREEN_WIDTH/4, SCREEN_HEIGHT/2);
+
+	b2Body* baseBody = App->physics->world->CreateBody(&baseDef);
+
+	b2PolygonShape baseBox;
+	baseBox.SetAsBox(50.0f, 50.0f);
+
+	baseBody->CreateFixture(&baseBox, 0.0f);
+
+	b2BodyDef movDef;
+	movDef.position.Set(SCREEN_WIDTH / 4, SCREEN_HEIGHT / 2);
+
+	b2Body* movBody = App->physics->world->CreateBody(&movDef);
+
+	b2PolygonShape movBox;
+	movBox.SetAsBox(50.0f, 50.0f);
+
+	movBody->CreateFixture(&movBox, 0.0f);
+
+	b2RevoluteJointDef revjointdef;
+	revjointdef.bodyA = baseBody;
+	revjointdef.bodyB = movBody;
+
+	revjointdef.collideConnected = false;
+	revjointdef.localAnchorA.Set(1, 1);
+	revjointdef.localAnchorB.Set(0, 0);
+	
+	revjointdef.referenceAngle = 0;
+
+	revjointdef.enableLimit = true;
+	revjointdef.lowerAngle = -45 * DEGTORAD;
+	revjointdef.upperAngle = 45 * DEGTORAD;
+
 	return ret;
 }
 
