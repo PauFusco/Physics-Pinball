@@ -95,9 +95,9 @@ void EntityManager::AddEntity(Entity* entity)
 	if ( entity != nullptr) entities.add(entity);
 }
 
-bool EntityManager::Update(float dt)
+update_status EntityManager::Update(float dt)
 {
-	bool ret = true;
+
 	p2List_item<Entity*>* item;
 	Entity* pEntity = NULL;
 
@@ -109,5 +109,5 @@ bool EntityManager::Update(float dt)
 		ret = item->data->Update();
 	}
 
-	return ret;
+	return UPDATE_CONTINUE;
 }

@@ -18,7 +18,7 @@ public:
 	bool Start();
 
 	// Called every frame
-	bool Update(float dt);
+	update_status Update(float dt);
 
 	// Called before quitting
 	bool CleanUp();

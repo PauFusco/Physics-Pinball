@@ -12,6 +12,7 @@ class ModuleAudio;
 class ModulePlayer;
 class ModuleSceneIntro;
 class ModulePhysics;
+class EntityManager;
 
 class Application
 {
@@ -24,7 +25,7 @@ public:
 	ModulePlayer* player;
 	ModuleSceneIntro* scene_intro;
 	ModulePhysics* physics;
-
+	EntityManager* ent_manager;
 private:
 
 	p2List<Module*> list_modules;

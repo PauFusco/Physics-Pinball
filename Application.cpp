@@ -8,6 +8,7 @@
 #include "ModulePlayer.h"
 #include "ModulePhysics.h"
 #include "ModuleSceneIntro.h"
+#include "EntityManager.h"
 
 #include "Application.h"
 
@@ -21,6 +22,8 @@ Application::Application()
 	player = new ModulePlayer(this);
 	scene_intro = new ModuleSceneIntro(this);
 	physics = new ModulePhysics(this);
+	ent_manager = new EntityManager(this);
+
 
 	// The order of calls is very important!
 	// Modules will Init() Start() and Update in this order
@@ -39,6 +42,7 @@ Application::Application()
 	
 	// Player
 	AddModule(player);
+	AddModule(ent_manager);
 }
 
 Application::~Application()
