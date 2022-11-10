@@ -70,6 +70,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
+    <ClInclude Include="Bumper.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="EntityManager.h" />
     <ClInclude Include="Globals.h" />
@@ -88,6 +89,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="Bumper.cpp" />
     <ClCompile Include="EntityManager.cpp" />
     <ClCompile Include="log.cpp" />
     <ClCompile Include="Main.cpp" />
