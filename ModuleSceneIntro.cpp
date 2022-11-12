@@ -46,33 +46,9 @@ bool ModuleSceneIntro::Start()
 	// In ModulePhysics::PreUpdate(), we iterate over all sensors and (if colliding) we call the function ModuleSceneIntro::OnCollision()
 	lower_ground_sensor->listener = this;
 
-	int x = SCREEN_WIDTH / 2;
-	int y = SCREEN_HEIGHT / 1.5f;
-	int diameter = SCREEN_WIDTH / 15;
-	b2BodyDef body;
-	body.type = b2_staticBody;
-	body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
+	SetBumpers();
 
-	// Add this static body to the World
-	b2Body* big_ball = App->physics->world->CreateBody(&body);
-
-	// Create a big circle shape
-	b2CircleShape shape;
-	shape.m_radius = PIXEL_TO_METERS(diameter) * 0.5f;
-
-	// Create a fixture and associate the circle to it
-	b2FixtureDef fixture;
-	fixture.shape = &shape;
-
-	// Add the ficture (plus shape) to the static body
-	big_ball->CreateFixture(&fixture);
-	
-	PhysBody* ballin = new PhysBody();
-	ballin->body = big_ball;
-	big_ball->SetUserData(ballin);
-	ballin->ctype = ColliderType::BUMPER;
-	
-	ballin->listener = this;
+	SetPallets();
 
 	return ret;
 }
@@ -178,11 +154,6 @@ update_status ModuleSceneIntro::Update()
 	{
 		int x, y;
 		c->data->GetPosition(x, y);
-	
-		// If mouse is over this circle, paint the circle's texture
-		//if(c->data->Contains(App->input->GetMouseX(), App->input->GetMouseY()))
-		//App->renderer->Blit(circle, x, y, NULL, 1.0f, c->data->GetRotation());
-
 		c = c->next;
 	}
 
@@ -255,4 +226,87 @@ void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 	}
 
 	// Do something else. You can also check which bodies are colliding (sensor? ball? player?)
+}
+
+void ModuleSceneIntro::SetBumpers()
+{
+	int x = SCREEN_WIDTH / 2;
+	int y = SCREEN_HEIGHT / 1.5f;
+	int diameter = SCREEN_WIDTH / 15;
+	b2BodyDef body;
+	body.type = b2_staticBody;
+	body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
+
+	// Add this static body to the World
+	b2Body* big_ball = App->physics->world->CreateBody(&body);
+
+	// Create a big circle shape
+	b2CircleShape shape;
+	shape.m_radius = PIXEL_TO_METERS(diameter) * 0.5f;
+
+	// Create a fixture and associate the circle to it
+	b2FixtureDef fixture;
+	fixture.shape = &shape;
+
+	// Add the ficture (plus shape) to the static body
+	big_ball->CreateFixture(&fixture);
+
+	PhysBody* ballin = new PhysBody();
+	ballin->body = big_ball;
+	big_ball->SetUserData(ballin);
+	ballin->ctype = ColliderType::BUMPER;
+
+	ballin->listener = this;
+}
+
+void ModuleSceneIntro::SetPallets()
+{
+	int x = SCREEN_WIDTH / 2 + 60;
+	int y = SCREEN_HEIGHT / 1.5f + 70;
+
+	b2BodyDef base;
+	base.type = b2_staticBody;
+	base.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
+
+	// Add this static body to the World
+	b2Body* baseBody = App->physics->world->CreateBody(&base);
+
+	b2PolygonShape shape;
+	shape.SetAsBox(PIXEL_TO_METERS(20), PIXEL_TO_METERS(10));
+
+	b2FixtureDef fixture;
+	fixture.shape = &shape;
+
+	baseBody->CreateFixture(&fixture);
+
+	PhysBody* yo = new PhysBody();
+	yo->body = baseBody;
+	baseBody->SetUserData(&yo);
+	yo->ctype = ColliderType::BUMPER;
+
+	yo->listener = this;
+
+
+	x = SCREEN_WIDTH / 2 - 60;
+	y = SCREEN_HEIGHT / 1.5f + 70;
+
+	base.type = b2_staticBody;
+	base.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
+
+	// Add this static body to the World
+	baseBody = App->physics->world->CreateBody(&base);
+
+	shape.SetAsBox(PIXEL_TO_METERS(20), PIXEL_TO_METERS(10));
+
+	fixture.shape = &shape;
+
+	baseBody->CreateFixture(&fixture);
+
+	yo = new PhysBody();
+	yo->body = baseBody;
+	baseBody->SetUserData(&yo);
+	yo->ctype = ColliderType::BUMPER;
+
+	yo->listener = this;
+
 }
