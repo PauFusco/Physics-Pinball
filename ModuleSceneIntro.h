@@ -24,12 +24,17 @@ public:
 
 	// Lists of physics objects
 	p2List<PhysBody*> circles;
-	p2List<PhysBody*> boxes;
-	p2List<PhysBody*> ricks;
+	//p2List<PhysBody*> boxes;
+	//p2List<PhysBody*> ricks;
 
 	// Lower ground sensor (will kill all objects passig through it)
 	PhysBody* lower_ground_sensor;
+	PhysBody* higher_ground_sensor;
+	PhysBody* right_ground_sensor;
+	PhysBody* left_ground_sensor;
 	bool sensed;
+
+	PhysBody* ball;
 
 	// Textures
 	SDL_Texture* circle;
