@@ -208,7 +208,7 @@ void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 {
 	// Play Audio FX on every collision, regardless of who is colliding
 	App->audio->PlayFx(bonus_fx);	
-	
+	int bumpx, ballx, bumpy, bally;
 	switch (bodyA->ctype) {
 	case ColliderType::BALL:
 		switch (bodyB->ctype) {
@@ -216,7 +216,13 @@ void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 			break;
 
 		case ColliderType::BUMPER:
-			bodyA->body->ApplyLinearImpulse(b2Vec2(0, -0.75f), bodyA->body->GetPosition(), true);
+			bodyB->GetPosition(bumpx, bumpy);
+			bodyA->GetPosition(ballx, bally);
+
+			b2Vec2 forceDir = b2Vec2((ballx - bumpx), (bally - bumpy));
+
+			bodyA->body->ApplyLinearImpulse(0.05f * forceDir, bodyA->body->GetPosition(), true);
+
 			break;
 		}
 	}
