@@ -30,9 +30,7 @@ bool ModuleSceneIntro::Start()
 	App->renderer->camera.x = App->renderer->camera.y = 0;
 
 	// Load textures
-	circle = App->textures->Load("pinball/wheel.png"); 
-	box = App->textures->Load("pinball/crate.png");
-	rick = App->textures->Load("pinball/rick_head.png");
+	circle = App->textures->Load("Wahssets/Textures/Waluigi_Ball.png");
 
 	background = App->textures->Load("Wahssets/Textures/Waluigi_Pinball_Map.png");
 
@@ -54,6 +52,8 @@ bool ModuleSceneIntro::Start()
 
 	SetPallets();
 
+	App->audio->PlayMusic("Wahssets/Audio/Waluigi_Theme.ogg");
+
 	return ret;
 }
 
@@ -66,6 +66,7 @@ bool ModuleSceneIntro::CleanUp()
 
 update_status ModuleSceneIntro::Update()
 {
+	App->renderer->Blit(background, 0, 0);
 	// If user presses SPACE, enable RayCast
 	if(App->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN)
 	{
@@ -88,12 +89,6 @@ update_status ModuleSceneIntro::Update()
 		
 		circles.getLast()->data->listener = this;
 	}
-
-	//// If user presses 2, create a new box object
-	//if(App->input->GetKey(SDL_SCANCODE_2) == KEY_DOWN)
-	//{
-	//	boxes.add(App->physics->CreateRectangle(App->input->GetMouseX(), App->input->GetMouseY(), 100, 50));
-	//}
 
 	//// If user presses 3, create a new RickHead object
 	//if(App->input->GetKey(SDL_SCANCODE_3) == KEY_DOWN)
@@ -158,29 +153,11 @@ update_status ModuleSceneIntro::Update()
 	{
 		int x, y;
 		c->data->GetPosition(x, y);
+
+		App->renderer->Blit(circle, x, y);
+
 		c = c->next;
 	}
-
-	//// Boxes
-	//c = boxes.getFirst();
-	//while(c != NULL)
-	//{
-	//	int x, y;
-	//	c->data->GetPosition(x, y);
-	//
-	//	// Always paint boxes texture
-	//	App->renderer->Blit(box, x, y, NULL, 1.0f, c->data->GetRotation());
-	//
-	//	// Are we hitting this box with the raycast?
-	//	if(ray_on)
-	//	{
-	//		// Test raycast over the box, return fraction and normal vector
-	//		int hit = c->data->RayCast(ray.x, ray.y, mouse.x, mouse.y, normal.x, normal.y);
-	//		if(hit >= 0)
-	//			ray_hit = hit;
-	//	}
-	//	c = c->next;
-	//}
 
 	//// Rick Heads
 	//c = ricks.getFirst();
@@ -207,8 +184,6 @@ update_status ModuleSceneIntro::Update()
 		if(normal.x != 0.0f)
 			App->renderer->DrawLine(ray.x + destination.x, ray.y + destination.y, ray.x + destination.x + normal.x * 25.0f, ray.y + destination.y + normal.y * 25.0f, 100, 255, 100);
 	}
-
-	App->renderer->Blit(background, 0, 0);
 
 	// Keep playing
 	return UPDATE_CONTINUE;
