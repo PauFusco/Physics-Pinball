@@ -22,29 +22,22 @@ public:
 	void SetBumpers(int x, int y, int diameter);
 	void SetPallets();
 	void ApplyVectorImpulse(PhysBody* bodyA, PhysBody* bodyB);
+	void CreateBall(int x, int y);
+	void SetDespawnDetector();
+	void DespawnBall();
 
 public:
-
-	// Lists of physics objects
-	p2List<PhysBody*> circles;
-	//p2List<PhysBody*> boxes;
-	//p2List<PhysBody*> ricks;
 
 	PhysBody* back;
 
 	// Lower ground sensor (will kill all objects passig through it)
-	PhysBody* lower_ground_sensor;
-	PhysBody* higher_ground_sensor;
-	PhysBody* right_ground_sensor;
-	PhysBody* left_ground_sensor;
+	PhysBody* despawn_sensor;
 	bool sensed;
 
-	PhysBody* ball;
+	PhysBody* ballbod;
 
 	// Textures
-	SDL_Texture* circle;
-	SDL_Texture* box;
-	SDL_Texture* rick;
+	SDL_Texture* ball;
 	SDL_Texture* background;
 
 	// FX
@@ -53,4 +46,6 @@ public:
 	// Raycast
 	p2Point<int> ray;
 	bool ray_on;
+
+	int lifes;
 };

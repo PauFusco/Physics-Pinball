@@ -35,10 +35,9 @@ bool ModulePhysics::Start()
 
 	// Create a new World
 	world = new b2World(b2Vec2(GRAVITY_X, -GRAVITY_Y));
-
+	
 	// Set this module as a listener for contacts
 	world->SetContactListener(this);
-
 	// Create the main static ground of the scenario: a big circle in the middle of the screen
 	//CreateScenarioGround();
 

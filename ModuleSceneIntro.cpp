@@ -10,7 +10,6 @@
 ModuleSceneIntro::ModuleSceneIntro(Application* app, bool start_enabled) : Module(app, start_enabled)
 {
 	// Initialise all the internal class variables, at least to NULL pointer
-	circle = box = rick = NULL;
 	ray_on = false;
 	sensed = false;
 }
@@ -29,7 +28,7 @@ bool ModuleSceneIntro::Start()
 	App->renderer->camera.x = App->renderer->camera.y = 0;
 
 	// Load textures
-	circle = App->textures->Load("Wahssets/Textures/Waluigi_Ball.png");
+	ball = App->textures->Load("Wahssets/Textures/Waluigi_Ball.png");
 
 	background = App->textures->Load("Wahssets/Textures/Waluigi_Pinball_Map.png");
 
@@ -37,19 +36,10 @@ bool ModuleSceneIntro::Start()
 
 	// Create a big red sensor on the bottom of the screen.
 	// This sensor will not make other objects collide with it, but it can tell if it is "colliding" with something else
-	lower_ground_sensor = App->physics->CreateRectangleSensor(SCREEN_WIDTH / 2, SCREEN_HEIGHT, SCREEN_WIDTH, 50);
-	left_ground_sensor = App->physics->CreateRectangleSensor(0, SCREEN_HEIGHT/2, 50, SCREEN_HEIGHT);
-	higher_ground_sensor = App->physics->CreateRectangleSensor(SCREEN_WIDTH / 2, 0, SCREEN_WIDTH, 50);
-	right_ground_sensor = App->physics->CreateRectangleSensor(SCREEN_WIDTH, SCREEN_HEIGHT / 2, 50, SCREEN_HEIGHT);
-
-	lower_ground_sensor->ctype = ColliderType::WALL;
-	left_ground_sensor->ctype = ColliderType::WALL;
-	higher_ground_sensor->ctype = ColliderType::WALL;
-	right_ground_sensor->ctype = ColliderType::WALL;
+	SetDespawnDetector();
 
 	// Add this module (ModuleSceneIntro) as a listener for collisions with the sensor.
 	// In ModulePhysics::PreUpdate(), we iterate over all sensors and (if colliding) we call the function ModuleSceneIntro::OnCollision()
-	lower_ground_sensor->listener = this;
 
 	SetBumpers(180, 425, SCREEN_WIDTH / 15);
 	SetBumpers(305, 425, SCREEN_WIDTH / 15);
@@ -67,6 +57,8 @@ bool ModuleSceneIntro::Start()
 	SetBumpers(47, 228, SCREEN_WIDTH / 10);
 
 	SetPallets();
+
+	CreateBall(SCREEN_WIDTH / 4,0 );
 
 	//App->audio->PlayMusic("Wahssets/Audio/Waluigi_Theme.ogg");
 
@@ -200,6 +192,10 @@ update_status ModuleSceneIntro::Update()
 		if(normal.x != 0.0f)
 			App->renderer->DrawLine(ray.x + destination.x, ray.y + destination.y, ray.x + destination.x + normal.x * 25.0f, ray.y + destination.y + normal.y * 25.0f, 100, 255, 100);
 	}
+	
+	int ballx, bally;
+	ballbod->GetPosition(ballx, bally);
+	App->renderer->Blit(ball, ballx - 7, bally - 7);
 
 	// Keep playing
 	return UPDATE_CONTINUE;
@@ -215,15 +211,13 @@ void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 			ApplyVectorImpulse(bodyA, bodyB);
 			break;
 		case ColliderType::WALL:
-			/*b2Vec2 veloc = bodyA->body->GetLinearVelocity();
-			veloc *= -1;
-			bodyA->body->SetLinearVelocity(veloc);*/
+			ballbod->body->SetLinearVelocity(b2Vec2(0, 0));
+			ballbod->body->SetTransform(b2Vec2(PIXEL_TO_METERS(0), PIXEL_TO_METERS(0)), 0.0f);
+			
 			break;
 		}
 
 	}
-
-	// Do something else. You can also check which bodies are colliding (sensor? ball? player?)
 }
 
 void ModuleSceneIntro::SetBumpers(int x, int y, int diameter)
@@ -329,3 +323,63 @@ void ModuleSceneIntro::ApplyVectorImpulse(PhysBody* bodyA, PhysBody* bodyB)
 
 	App->audio->PlayFx(bonus_fx);
 }
+
+void ModuleSceneIntro::CreateBall(int x, int y)
+{
+	b2BodyDef body;
+	body.type = b2_dynamicBody;
+	body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
+
+	// Add this static body to the World
+	b2Body* big_ball = App->physics->world->CreateBody(&body);
+
+	// Create a big circle shape
+	b2CircleShape shape;
+	shape.m_radius = PIXEL_TO_METERS(7);
+
+	// Create a fixture and associate the circle to it
+	b2FixtureDef fixture;
+	fixture.shape = &shape;
+	fixture.density = 1.0f;
+
+	// Add the ficture (plus shape) to the static body
+	big_ball->CreateFixture(&fixture);
+
+	ballbod = new PhysBody();
+	ballbod->body = big_ball;
+	big_ball->SetUserData(ballbod);
+	ballbod->ctype = ColliderType::BALL;
+
+	ballbod->listener = this;
+}
+
+void ModuleSceneIntro::SetDespawnDetector()
+{
+	int x = 0;
+	int y = SCREEN_HEIGHT - 5;
+
+	b2BodyDef base;
+	base.type = b2_staticBody;
+	base.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
+
+	// Add this static body to the World
+	b2Body* baseBody = App->physics->world->CreateBody(&base);
+
+	b2PolygonShape shape;
+	shape.SetAsBox(PIXEL_TO_METERS(SCREEN_WIDTH), PIXEL_TO_METERS(5));
+
+	b2FixtureDef fixture;
+	fixture.shape = &shape;
+
+	baseBody->CreateFixture(&fixture);
+
+	PhysBody* yo = new PhysBody();
+	yo->body = baseBody;
+	baseBody->SetUserData(&yo);
+	yo->ctype = ColliderType::WALL;
+
+	yo->listener = this;
+	baseBody->SetUserData(yo);
+
+}
+
