@@ -29,6 +29,8 @@ public:
 	//p2List<PhysBody*> boxes;
 	//p2List<PhysBody*> ricks;
 
+	PhysBody* back;
+
 	// Lower ground sensor (will kill all objects passig through it)
 	PhysBody* lower_ground_sensor;
 	PhysBody* higher_ground_sensor;
@@ -42,6 +44,7 @@ public:
 	SDL_Texture* circle;
 	SDL_Texture* box;
 	SDL_Texture* rick;
+	SDL_Texture* background;
 
 	// FX
 	uint bonus_fx;

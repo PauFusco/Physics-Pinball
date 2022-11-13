@@ -33,6 +33,9 @@ bool ModuleSceneIntro::Start()
 	circle = App->textures->Load("pinball/wheel.png"); 
 	box = App->textures->Load("pinball/crate.png");
 	rick = App->textures->Load("pinball/rick_head.png");
+
+	background = App->textures->Load("Wahssets/Textures/Waluigi_Pinball_Map.png");
+
 	bonus_fx = App->audio->LoadFx("pinball/bonus.wav");
 
 	// Create a big red sensor on the bottom of the screen.
@@ -204,6 +207,8 @@ update_status ModuleSceneIntro::Update()
 		if(normal.x != 0.0f)
 			App->renderer->DrawLine(ray.x + destination.x, ray.y + destination.y, ray.x + destination.x + normal.x * 25.0f, ray.y + destination.y + normal.y * 25.0f, 100, 255, 100);
 	}
+
+	App->renderer->Blit(background, 0, 0);
 
 	// Keep playing
 	return UPDATE_CONTINUE;
