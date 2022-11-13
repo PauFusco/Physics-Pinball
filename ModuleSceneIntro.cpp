@@ -47,12 +47,27 @@ bool ModuleSceneIntro::Start()
 	// In ModulePhysics::PreUpdate(), we iterate over all sensors and (if colliding) we call the function ModuleSceneIntro::OnCollision()
 	lower_ground_sensor->listener = this;
 
-	SetBumpers(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 1.5f, SCREEN_WIDTH / 15);
-	SetBumpers(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2.5f, SCREEN_WIDTH / 15);
+	SetBumpers(180, 425, SCREEN_WIDTH / 15);
+	SetBumpers(305, 425, SCREEN_WIDTH / 15);
+	
+	SetBumpers(195, 300, SCREEN_WIDTH / 15);
+	SetBumpers(290, 300, SCREEN_WIDTH / 15);
+	SetBumpers(290, 225, SCREEN_WIDTH / 15);
+	SetBumpers(195, 225, SCREEN_WIDTH / 15);
+	SetBumpers(245, 265, SCREEN_WIDTH / 15);
+	
+	SetBumpers(195, 570, SCREEN_WIDTH / 20);
+	SetBumpers(285, 570, SCREEN_WIDTH / 20);
+	
+	SetBumpers(439, 228, SCREEN_WIDTH / 10);
+	SetBumpers(47, 228, SCREEN_WIDTH / 10);
+
+
+	
 
 	SetPallets();
 
-	App->audio->PlayMusic("Wahssets/Audio/Waluigi_Theme.ogg");
+	//App->audio->PlayMusic("Wahssets/Audio/Waluigi_Theme.ogg");
 
 	return ret;
 }
