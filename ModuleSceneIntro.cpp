@@ -213,9 +213,6 @@ void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 	switch (bodyA->ctype) {
 	case ColliderType::BALL:
 		switch (bodyB->ctype) {
-		case ColliderType::WALL:
-			break;
-
 		case ColliderType::BUMPER:
 			ApplyVectorImpulse(bodyA, bodyB);
 			break;
