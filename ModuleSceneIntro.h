@@ -24,9 +24,12 @@ public:
 	void ApplyVectorImpulse(PhysBody* bodyA, PhysBody* bodyB);
 	void CreateBall(int x, int y);
 	void SetDespawnDetector();
-	void DespawnBall();
+	//void DespawnBall();
 
 public:
+
+	p2List<PhysBody*> circles;
+	p2List<PhysBody*> ricks;
 
 	PhysBody* back;
 
@@ -37,7 +40,7 @@ public:
 	PhysBody* ballbod;
 
 	// Textures
-	SDL_Texture* ball;
+	SDL_Texture* ballTex;
 	SDL_Texture* background;
 
 	// FX

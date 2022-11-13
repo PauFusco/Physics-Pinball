@@ -28,18 +28,50 @@ bool ModuleSceneIntro::Start()
 	App->renderer->camera.x = App->renderer->camera.y = 0;
 
 	// Load textures
-	ball = App->textures->Load("Wahssets/Textures/Waluigi_Ball.png");
+	ballTex = App->textures->Load("Wahssets/Textures/Waluigi_Ball.png");
 
 	background = App->textures->Load("Wahssets/Textures/Waluigi_Pinball_Map.png");
 
 	bonus_fx = App->audio->LoadFx("Wahssets/Audio/bonus.wav");
 
-	// Create a big red sensor on the bottom of the screen.
-	// This sensor will not make other objects collide with it, but it can tell if it is "colliding" with something else
-	SetDespawnDetector();
+	int Waluigi_Pinball_Map[66] = {
+	454, 639,
+	454, 345,
+	474, 345,
+	480, 338,
+	480, 101,
+	417, 30,
+	347, 0,
+	196, 0,
+	196, 30,
+	93, 75,
+	47, 136,
+	47, 274,
+	134, 353,
+	134, 401,
+	93, 460,
+	93, 577,
+	140, 641,
+	347, 641,
+	393, 576,
+	396, 462,
+	356, 398,
+	356, 354,
+	440, 273,
+	439, 136,
+	388, 74,
+	288, 30,
+	320, 30,
+	401, 68,
+	451, 123,
+	451, 278,
+	422, 302,
+	420, 639,
+	454, 639
+	};
+	App->physics->CreateChain(0, 0, Waluigi_Pinball_Map, 65);
 
-	// Add this module (ModuleSceneIntro) as a listener for collisions with the sensor.
-	// In ModulePhysics::PreUpdate(), we iterate over all sensors and (if colliding) we call the function ModuleSceneIntro::OnCollision()
+	SetDespawnDetector();
 
 	SetBumpers(180, 425, SCREEN_WIDTH / 15);
 	SetBumpers(305, 425, SCREEN_WIDTH / 15);
@@ -75,6 +107,7 @@ bool ModuleSceneIntro::CleanUp()
 update_status ModuleSceneIntro::Update()
 {
 	App->renderer->Blit(background, 0, 0);
+	
 	// If user presses SPACE, enable RayCast
 	if(App->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN)
 	{
@@ -89,56 +122,12 @@ update_status ModuleSceneIntro::Update()
 	// If user presses 1, create a new circle object
 	if(App->input->GetKey(SDL_SCANCODE_1) == KEY_DOWN)
 	{
-		circles.add(App->physics->CreateCircle(App->input->GetMouseX(), App->input->GetMouseY(), 7));
+		if (circles.getFirst() == nullptr) 		circles.add(App->physics->CreateCircle(App->input->GetMouseX(), App->input->GetMouseY(), 7));
 	
-		// Add this module (ModuleSceneIntro) as a "listener" interested in collisions with circles.
-		// If Box2D detects a collision with this last generated circle, it will automatically callback the function ModulePhysics::BeginContact()
 		circles.getLast()->data->ctype = ColliderType::BALL;
 		
 		circles.getLast()->data->listener = this;
-	}
-
-	//// If user presses 3, create a new RickHead object
-	//if(App->input->GetKey(SDL_SCANCODE_3) == KEY_DOWN)
-	//{
-	//	// Pivot 0, 0
-	//	int rick_head[64] = {
-	//		14, 36,
-	//		42, 40,
-	//		40, 0,
-	//		75, 30,
-	//		88, 4,
-	//		94, 39,
-	//		111, 36,
-	//		104, 58,
-	//		107, 62,
-	//		117, 67,
-	//		109, 73,
-	//		110, 85,
-	//		106, 91,
-	//		109, 99,
-	//		103, 104,
-	//		100, 115,
-	//		106, 121,
-	//		103, 125,
-	//		98, 126,
-	//		95, 137,
-	//		83, 147,
-	//		67, 147,
-	//		53, 140,
-	//		46, 132,
-	//		34, 136,
-	//		38, 126,
-	//		23, 123,
-	//		30, 114,
-	//		10, 102,
-	//		29, 90,
-	//		0, 75,
-	//		30, 62
-	//	};
-	//
-	//	ricks.add(App->physics->CreateChain(App->input->GetMouseX(), App->input->GetMouseY(), rick_head, 64));
-	//}
+	}	
 
 	// Prepare for raycast ------------------------------------------------------
 	
@@ -162,7 +151,7 @@ update_status ModuleSceneIntro::Update()
 		int x, y;
 		c->data->GetPosition(x, y);
 
-		App->renderer->Blit(circle, x, y);
+		App->renderer->Blit(ballTex, x, y);
 
 		c = c->next;
 	}
@@ -195,7 +184,7 @@ update_status ModuleSceneIntro::Update()
 	
 	int ballx, bally;
 	ballbod->GetPosition(ballx, bally);
-	App->renderer->Blit(ball, ballx - 7, bally - 7);
+	App->renderer->Blit(ballTex, ballx - 7, bally - 7);
 
 	// Keep playing
 	return UPDATE_CONTINUE;
@@ -211,9 +200,8 @@ void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 			ApplyVectorImpulse(bodyA, bodyB);
 			break;
 		case ColliderType::WALL:
-			ballbod->body->SetLinearVelocity(b2Vec2(0, 0));
-			ballbod->body->SetTransform(b2Vec2(PIXEL_TO_METERS(0), PIXEL_TO_METERS(0)), 0.0f);
-			
+			//circles.getFirst()->data->body->DestroyFixture();
+			circles.del(circles.getFirst());			
 			break;
 		}
 
@@ -382,4 +370,3 @@ void ModuleSceneIntro::SetDespawnDetector()
 	baseBody->SetUserData(yo);
 
 }
-
