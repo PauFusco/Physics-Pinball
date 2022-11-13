@@ -46,7 +46,8 @@ bool ModuleSceneIntro::Start()
 	// In ModulePhysics::PreUpdate(), we iterate over all sensors and (if colliding) we call the function ModuleSceneIntro::OnCollision()
 	lower_ground_sensor->listener = this;
 
-	SetBumpers();
+	SetBumpers(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 1.5f, SCREEN_WIDTH / 15);
+	SetBumpers(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2.5f, SCREEN_WIDTH / 15);
 
 	SetPallets();
 
@@ -228,11 +229,8 @@ void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 	// Do something else. You can also check which bodies are colliding (sensor? ball? player?)
 }
 
-void ModuleSceneIntro::SetBumpers()
+void ModuleSceneIntro::SetBumpers(int x, int y, int diameter)
 {
-	int x = SCREEN_WIDTH / 2;
-	int y = SCREEN_HEIGHT / 1.5f;
-	int diameter = SCREEN_WIDTH / 15;
 	b2BodyDef body;
 	body.type = b2_staticBody;
 	body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
@@ -285,28 +283,36 @@ void ModuleSceneIntro::SetPallets()
 	yo->ctype = ColliderType::BUMPER;
 
 	yo->listener = this;
+	baseBody->SetUserData(yo);
 
 
-	x = SCREEN_WIDTH / 2 - 60;
+	x = SCREEN_WIDTH / 2 + 41;
 	y = SCREEN_HEIGHT / 1.5f + 70;
 
-	base.type = b2_staticBody;
+	base.type = b2_dynamicBody;
 	base.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
 
 	// Add this static body to the World
-	baseBody = App->physics->world->CreateBody(&base);
+	b2Body* palaBody = App->physics->world->CreateBody(&base);
 
 	shape.SetAsBox(PIXEL_TO_METERS(20), PIXEL_TO_METERS(10));
 
 	fixture.shape = &shape;
 
-	baseBody->CreateFixture(&fixture);
+	palaBody->CreateFixture(&fixture);
 
 	yo = new PhysBody();
-	yo->body = baseBody;
-	baseBody->SetUserData(&yo);
+	yo->body = palaBody;
+	palaBody->SetUserData(&yo);
 	yo->ctype = ColliderType::BUMPER;
 
 	yo->listener = this;
+	palaBody->SetUserData(yo);
+	b2RevoluteJointDef revoluteJointDef;
+	revoluteJointDef.bodyA = baseBody;
+	revoluteJointDef.bodyB = palaBody;
+	revoluteJointDef.collideConnected = false;
 
+	revoluteJointDef.localAnchorA.Set(0, 0);
+	revoluteJointDef.localAnchorB.Set(PIXEL_TO_METERS(20), 0);
 }
