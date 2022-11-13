@@ -31,6 +31,14 @@ public:
 	PhysBody* lower_ground_sensor;
 	bool sensed;
 
+<<<<<<< Updated upstream
+=======
+	PhysBody* ball;
+	PhysBody* palaBodyL;
+	PhysBody* palaBodyR;
+	b2RevoluteJointDef* revoluteJointDef;
+
+>>>>>>> Stashed changes
 	// Textures
 	SDL_Texture* circle;
 	SDL_Texture* box;

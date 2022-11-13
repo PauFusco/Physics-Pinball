@@ -66,6 +66,13 @@ update_status ModuleSceneIntro::Update()
 		ray.y = App->input->GetMouseY();
 	}
 
+	if (App->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_DOWN)
+	{
+
+		revoluteJointDef->enableMotor = true;
+
+	}
+
 	// If user presses 1, create a new circle object
 	if(App->input->GetKey(SDL_SCANCODE_1) == KEY_DOWN)
 	{
@@ -76,6 +83,7 @@ update_status ModuleSceneIntro::Update()
 		circles.getLast()->data->listener = this;
 	}
 
+<<<<<<< Updated upstream
 	// If user presses 2, create a new box object
 	if(App->input->GetKey(SDL_SCANCODE_2) == KEY_DOWN)
 	{
@@ -124,6 +132,8 @@ update_status ModuleSceneIntro::Update()
 		ricks.add(App->physics->CreateChain(App->input->GetMouseX(), App->input->GetMouseY(), rick_head, 64));
 	}
 
+=======
+>>>>>>> Stashed changes
 	// Prepare for raycast ------------------------------------------------------
 	
 	// The target point of the raycast is the mouse current position (will change over game time)
@@ -211,3 +221,112 @@ void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 
 	// Do something else. You can also check which bodies are colliding (sensor? ball? player?)
 }
+<<<<<<< Updated upstream
+=======
+
+void ModuleSceneIntro::SetBumpers(int x, int y, int diameter)
+{
+	b2BodyDef body;
+	body.type = b2_staticBody;
+	body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
+
+	// Add this static body to the World
+	b2Body* big_ball = App->physics->world->CreateBody(&body);
+
+	// Create a big circle shape
+	b2CircleShape shape;
+	shape.m_radius = PIXEL_TO_METERS(diameter) * 0.5f;
+
+	// Create a fixture and associate the circle to it
+	b2FixtureDef fixture;
+	fixture.shape = &shape;
+
+	// Add the ficture (plus shape) to the static body
+	big_ball->CreateFixture(&fixture);
+
+	PhysBody* ballin = new PhysBody();
+	ballin->body = big_ball;
+	big_ball->SetUserData(ballin);
+	ballin->ctype = ColliderType::BUMPER;
+
+	ballin->listener = this;
+}
+
+void ModuleSceneIntro::SetPallets()
+{
+	int x = SCREEN_WIDTH / 2 + 60;
+	int y = SCREEN_HEIGHT / 1.5f + 70;
+
+	b2BodyDef base;
+	base.type = b2_staticBody;
+	base.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
+
+	// Add this static body to the World
+	b2Body* baseBody = App->physics->world->CreateBody(&base);
+
+	b2PolygonShape shape;
+	shape.SetAsBox(PIXEL_TO_METERS(20), PIXEL_TO_METERS(10));
+
+	b2FixtureDef fixture;
+	fixture.shape = &shape;
+
+	baseBody->CreateFixture(&fixture);
+
+	PhysBody* yo = new PhysBody();
+	yo->body = baseBody;
+	baseBody->SetUserData(&yo);
+	yo->ctype = ColliderType::BUMPER;
+
+	yo->listener = this;
+	baseBody->SetUserData(yo);
+
+
+	x = SCREEN_WIDTH / 2 + 41;
+	y = SCREEN_HEIGHT / 1.5f + 70;
+
+	base.type = b2_dynamicBody;
+	base.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
+
+	// Add this static body to the World
+	b2Body* palaBody = App->physics->world->CreateBody(&base);
+
+	shape.SetAsBox(PIXEL_TO_METERS(20), PIXEL_TO_METERS(10));
+
+	fixture.shape = &shape;
+
+	palaBody->CreateFixture(&fixture);
+
+	palaBodyR = new PhysBody();
+	palaBodyR->body = palaBody;
+	palaBody->SetUserData(&palaBodyR);
+	palaBodyR->ctype = ColliderType::BUMPER;
+
+	palaBodyR->listener = this;
+	palaBody->SetUserData(palaBodyR);
+	b2RevoluteJointDef* a = new b2RevoluteJointDef;
+	revoluteJointDef = a;
+	revoluteJointDef->bodyA = baseBody;
+	revoluteJointDef->bodyB = palaBody;
+	revoluteJointDef->collideConnected = false;
+
+	revoluteJointDef->localAnchorA.Set(0, 0);
+	revoluteJointDef->localAnchorB.Set(PIXEL_TO_METERS(20), 0);
+
+	revoluteJointDef->lowerAngle = 0;
+	revoluteJointDef->upperAngle = 2;
+}
+
+void ModuleSceneIntro::ApplyVectorImpulse(PhysBody* bodyA, PhysBody* bodyB)
+{
+	int bumpx, ballx, bumpy, bally;
+
+	bodyB->GetPosition(bumpx, bumpy);
+	bodyA->GetPosition(ballx, bally);
+
+	b2Vec2 forceDir = b2Vec2((ballx - bumpx), (bally - bumpy));
+
+	bodyA->body->SetLinearVelocity(b2Vec2(0, 0));
+
+	bodyA->body->ApplyLinearImpulse(0.03f * forceDir, bodyA->body->GetPosition(), true);
+}
+>>>>>>> Stashed changes
