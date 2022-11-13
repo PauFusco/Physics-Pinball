@@ -16,6 +16,7 @@ enum class ColliderType {
 	BUMPER,
 	BALL,
 	PALLET,
+	WALL,
 	UNKNOWN
 	// ..
 };

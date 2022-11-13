@@ -9,7 +9,6 @@
 
 ModuleSceneIntro::ModuleSceneIntro(Application* app, bool start_enabled) : Module(app, start_enabled)
 {
-
 	// Initialise all the internal class variables, at least to NULL pointer
 	circle = box = rick = NULL;
 	ray_on = false;
@@ -43,6 +42,11 @@ bool ModuleSceneIntro::Start()
 	higher_ground_sensor = App->physics->CreateRectangleSensor(SCREEN_WIDTH / 2, 0, SCREEN_WIDTH, 50);
 	right_ground_sensor = App->physics->CreateRectangleSensor(SCREEN_WIDTH, SCREEN_HEIGHT / 2, 50, SCREEN_HEIGHT);
 
+	lower_ground_sensor->ctype = ColliderType::WALL;
+	left_ground_sensor->ctype = ColliderType::WALL;
+	higher_ground_sensor->ctype = ColliderType::WALL;
+	right_ground_sensor->ctype = ColliderType::WALL;
+
 	// Add this module (ModuleSceneIntro) as a listener for collisions with the sensor.
 	// In ModulePhysics::PreUpdate(), we iterate over all sensors and (if colliding) we call the function ModuleSceneIntro::OnCollision()
 	lower_ground_sensor->listener = this;
@@ -61,9 +65,6 @@ bool ModuleSceneIntro::Start()
 	
 	SetBumpers(439, 228, SCREEN_WIDTH / 10);
 	SetBumpers(47, 228, SCREEN_WIDTH / 10);
-
-
-	
 
 	SetPallets();
 
@@ -208,21 +209,15 @@ void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 {
 	// Play Audio FX on every collision, regardless of who is colliding
 	App->audio->PlayFx(bonus_fx);	
-	int bumpx, ballx, bumpy, bally;
+	
 	switch (bodyA->ctype) {
 	case ColliderType::BALL:
 		switch (bodyB->ctype) {
-		case ColliderType::BALL:
+		case ColliderType::WALL:
 			break;
 
 		case ColliderType::BUMPER:
-			bodyB->GetPosition(bumpx, bumpy);
-			bodyA->GetPosition(ballx, bally);
-
-			b2Vec2 forceDir = b2Vec2((ballx - bumpx), (bally - bumpy));
-
-			bodyA->body->ApplyLinearImpulse(0.05f * forceDir, bodyA->body->GetPosition(), true);
-
+			ApplyVectorImpulse(bodyA, bodyB);
 			break;
 		}
 	}
@@ -316,4 +311,18 @@ void ModuleSceneIntro::SetPallets()
 
 	revoluteJointDef.localAnchorA.Set(0, 0);
 	revoluteJointDef.localAnchorB.Set(PIXEL_TO_METERS(20), 0);
+}
+
+void ModuleSceneIntro::ApplyVectorImpulse(PhysBody* bodyA, PhysBody* bodyB)
+{
+	int bumpx, ballx, bumpy, bally;
+
+	bodyB->GetPosition(bumpx, bumpy);
+	bodyA->GetPosition(ballx, bally);
+
+	b2Vec2 forceDir = b2Vec2((ballx - bumpx), (bally - bumpy));
+
+	bodyA->body->SetLinearVelocity(b2Vec2(0, 0));
+
+	bodyA->body->ApplyLinearImpulse(0.03f * forceDir, bodyA->body->GetPosition(), true);
 }

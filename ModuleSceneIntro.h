@@ -21,6 +21,7 @@ public:
 	void OnCollision(PhysBody* bodyA, PhysBody* bodyB);
 	void SetBumpers(int x, int y, int diameter);
 	void SetPallets();
+	void ApplyVectorImpulse(PhysBody* bodyA, PhysBody* bodyB);
 
 public:
 
