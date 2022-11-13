@@ -33,7 +33,7 @@ bool ModuleSceneIntro::Start()
 
 	background = App->textures->Load("Wahssets/Textures/Waluigi_Pinball_Map.png");
 
-	bonus_fx = App->audio->LoadFx("pinball/bonus.wav");
+	bonus_fx = App->audio->LoadFx("Wahssets/Audio/bonus.wav");
 
 	// Create a big red sensor on the bottom of the screen.
 	// This sensor will not make other objects collide with it, but it can tell if it is "colliding" with something else
@@ -208,15 +208,19 @@ update_status ModuleSceneIntro::Update()
 void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 {
 	// Play Audio FX on every collision, regardless of who is colliding
-	App->audio->PlayFx(bonus_fx);	
-	
 	switch (bodyA->ctype) {
 	case ColliderType::BALL:
 		switch (bodyB->ctype) {
 		case ColliderType::BUMPER:
 			ApplyVectorImpulse(bodyA, bodyB);
 			break;
+		case ColliderType::WALL:
+			/*b2Vec2 veloc = bodyA->body->GetLinearVelocity();
+			veloc *= -1;
+			bodyA->body->SetLinearVelocity(veloc);*/
+			break;
 		}
+
 	}
 
 	// Do something else. You can also check which bodies are colliding (sensor? ball? player?)
@@ -322,4 +326,6 @@ void ModuleSceneIntro::ApplyVectorImpulse(PhysBody* bodyA, PhysBody* bodyB)
 	bodyA->body->SetLinearVelocity(b2Vec2(0, 0));
 
 	bodyA->body->ApplyLinearImpulse(0.03f * forceDir, bodyA->body->GetPosition(), true);
+
+	App->audio->PlayFx(bonus_fx);
 }
