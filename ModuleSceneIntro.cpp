@@ -110,10 +110,11 @@ bool ModuleSceneIntro::CleanUp()
 update_status ModuleSceneIntro::Update()
 {
 	App->renderer->Blit(background, 0, 0);
-	
-	if (canLaunch && App->input->GetKey(SDL_SCANCODE_UP) == KEY_DOWN)
+	Debug();
+	if (canLaunch && App->input->GetKey(SDL_SCANCODE_UP) == KEY_REPEAT)
 	{
 		circles.getFirst()->data->body->ApplyLinearImpulse(b2Vec2(0, -4.5f), circles.getFirst()->data->body->GetPosition(), true);
+		canLaunch = false;
 	}
 
 	// If user presses SPACE, enable RayCast
@@ -140,7 +141,15 @@ update_status ModuleSceneIntro::Update()
 
 		spawn = false;
 	}
-
+	
+	if (despawn)
+	{
+		circles.getFirst()->data->body->DestroyFixture(circles.getFirst()->data->body->GetFixtureList());
+		circles.del(circles.getFirst());
+		despawn = false;
+		spawn = true;
+	}
+	
 	// Prepare for raycast ------------------------------------------------------
 	
 	// The target point of the raycast is the mouse current position (will change over game time)
@@ -184,18 +193,6 @@ update_status ModuleSceneIntro::Update()
 			App->renderer->DrawLine(ray.x + destination.x, ray.y + destination.y, ray.x + destination.x + normal.x * 25.0f, ray.y + destination.y + normal.y * 25.0f, 100, 255, 100);
 	}
 
-	if (despawn)
-	{
-		circles.getFirst()->data->body->DestroyFixture(circles.getFirst()->data->body->GetFixtureList());
-		circles.del(circles.getFirst());
-		despawn = false;
-		spawn = true;
-	}
-
-	//int ballx, bally;
-	//ballbod->GetPosition(ballx, bally);
-	//App->renderer->Blit(ballTex, ballx - 7, bally - 7);
-
 	// Keep playing
 	return UPDATE_CONTINUE;
 }
@@ -211,6 +208,7 @@ void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 			break;
 		case ColliderType::WALL:
 			despawn = true;
+			canLaunch = true;
 			break;
 		case ColliderType::LAUNCHER:
 			canLaunch = true;
@@ -318,7 +316,7 @@ void ModuleSceneIntro::ApplyVectorImpulse(PhysBody* bodyA, PhysBody* bodyB)
 
 	bodyA->body->SetLinearVelocity(b2Vec2(0, 0));
 
-	bodyA->body->ApplyLinearImpulse(0.02f * forceDir, bodyA->body->GetPosition(), true);
+	bodyA->body->ApplyLinearImpulse(bumpImp * forceDir, bodyA->body->GetPosition(), true);
 
 	App->audio->PlayFx(bonus_fx);
 }
@@ -393,12 +391,12 @@ void ModuleSceneIntro::SetLauncherFloor()
 	int x = 438;
 	int y = 582;
 
-	b2BodyDef base;
-	base.type = b2_staticBody;
-	base.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
+	b2BodyDef launcher;
+	launcher.type = b2_staticBody;
+	launcher.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
 
 	// Add this static body to the World
-	b2Body* baseBody = App->physics->world->CreateBody(&base);
+	b2Body* launcherBody = App->physics->world->CreateBody(&launcher);
 
 	b2PolygonShape shape;
 	shape.SetAsBox(PIXEL_TO_METERS(23), PIXEL_TO_METERS(9));
@@ -406,13 +404,19 @@ void ModuleSceneIntro::SetLauncherFloor()
 	b2FixtureDef fixture;
 	fixture.shape = &shape;
 
-	baseBody->CreateFixture(&fixture);
+	launcherBody->CreateFixture(&fixture);
 
 	PhysBody* yo = new PhysBody();
-	yo->body = baseBody;
-	baseBody->SetUserData(&yo);
+	yo->body = launcherBody;
+	launcherBody->SetUserData(&yo);
 	yo->ctype = ColliderType::LAUNCHER;
 
 	yo->listener = this;
-	baseBody->SetUserData(yo);
+	launcherBody->SetUserData(yo);
+}
+
+void ModuleSceneIntro::Debug()
+{
+	if (App->input->GetKey(SDL_SCANCODE_F11)) bumpImp += 0.01f;
+	if (App->input->GetKey(SDL_SCANCODE_F10)) bumpImp -= 0.01f;
 }

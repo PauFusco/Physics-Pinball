@@ -26,6 +26,7 @@ public:
 	void SetDespawnDetector();
 	void DespawnBall();
 	void SetLauncherFloor();
+	void Debug();
 
 public:
 
@@ -56,4 +57,6 @@ public:
 	bool despawn = false;
 	bool spawn = true;
 	bool canLaunch = true;
+
+	float bumpImp = 0.02f;
 };
