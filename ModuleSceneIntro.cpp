@@ -111,6 +111,11 @@ update_status ModuleSceneIntro::Update()
 {
 	App->renderer->Blit(background, 0, 0);
 	
+	if (canLaunch && App->input->GetKey(SDL_SCANCODE_UP) == KEY_DOWN)
+	{
+		circles.getFirst()->data->body->ApplyLinearImpulse(b2Vec2(0, -100), circles.getFirst()->data->body->GetPosition(), true);
+	}
+
 	// If user presses SPACE, enable RayCast
 	if(App->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN)
 	{
@@ -206,6 +211,9 @@ void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 			break;
 		case ColliderType::WALL:
 			despawn = true;
+			break;
+		case ColliderType::LAUNCHER:
+			canLaunch = true;
 			break;
 		}
 	}
@@ -403,7 +411,7 @@ void ModuleSceneIntro::SetLauncherFloor()
 	PhysBody* yo = new PhysBody();
 	yo->body = baseBody;
 	baseBody->SetUserData(&yo);
-	yo->ctype = ColliderType::UNKNOWN;
+	yo->ctype = ColliderType::LAUNCHER;
 
 	yo->listener = this;
 	baseBody->SetUserData(yo);
