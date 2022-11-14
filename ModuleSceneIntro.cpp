@@ -113,7 +113,7 @@ update_status ModuleSceneIntro::Update()
 	
 	if (canLaunch && App->input->GetKey(SDL_SCANCODE_UP) == KEY_DOWN)
 	{
-		circles.getFirst()->data->body->ApplyLinearImpulse(b2Vec2(0, -100), circles.getFirst()->data->body->GetPosition(), true);
+		circles.getFirst()->data->body->ApplyLinearImpulse(b2Vec2(0, -4.5f), circles.getFirst()->data->body->GetPosition(), true);
 	}
 
 	// If user presses SPACE, enable RayCast
