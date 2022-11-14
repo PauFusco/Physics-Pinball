@@ -54,9 +54,26 @@ public:
 
 	int lifes;
 
+	// Points
+	int score = 0;
+	int highScore = 0;
+	
+	// Points as char
+	char* scoreInd = "SCORE ";
+	char* highInd =	 "HIGH ";
+	
+	// Point text
+	const char* highChar;
+	const char* scoreChar;
+
+
+
 	bool despawn = false;
 	bool spawn = true;
 	bool canLaunch = true;
 
-	float bumpImp = 0.02f;
+	float bumpImp = 0.015f;
+
+	char* fontPath = "Wahssets/Fonts/rtype_font3.png";
+	char* fontOrder = "! c,_./0123456789e;<>?ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 };

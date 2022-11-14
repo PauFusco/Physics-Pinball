@@ -6,6 +6,11 @@
 #include "ModuleTextures.h"
 #include "ModuleAudio.h"
 #include "ModulePhysics.h"
+#include "ModuleFonts.h"
+
+#include <string>
+
+using namespace std;
 
 ModuleSceneIntro::ModuleSceneIntro(Application* app, bool start_enabled) : Module(app, start_enabled)
 {
@@ -33,6 +38,8 @@ bool ModuleSceneIntro::Start()
 	background = App->textures->Load("Wahssets/Textures/Waluigi_Pinball_Map.png");
 
 	bonus_fx = App->audio->LoadFx("Wahssets/Audio/bonus.wav");
+
+	App->fonts->Load(fontPath, fontOrder, 2);
 
 	int Waluigi_Pinball_Map[66] = {
 	454, 639,
@@ -71,7 +78,6 @@ bool ModuleSceneIntro::Start()
 	};
 	App->physics->CreateChain(0, 0, Waluigi_Pinball_Map, 65);
 
-
 	SetDespawnDetector();
 
 	SetBumpers(180, 425, SCREEN_WIDTH / 15);
@@ -87,11 +93,9 @@ bool ModuleSceneIntro::Start()
 	SetBumpers(285, 570, SCREEN_WIDTH / 20);
 	
 	SetBumpers(439, 228, SCREEN_WIDTH / 10);
-	SetBumpers(47, 228, SCREEN_WIDTH / 10);
+	SetBumpers( 47, 228, SCREEN_WIDTH / 10);
 
 	SetPallets();
-
-	//CreateBall(SCREEN_WIDTH / 4,0 );
 
 	SetLauncherFloor();
 
@@ -110,7 +114,20 @@ bool ModuleSceneIntro::CleanUp()
 update_status ModuleSceneIntro::Update()
 {
 	App->renderer->Blit(background, 0, 0);
+	
+	string temp = to_string(score);
+	scoreChar = temp.c_str();
+	temp = to_string(highScore);
+	highChar = temp.c_str();
+
+	App->fonts->BlitText(0, 0, 0, highInd);
+	App->fonts->BlitText(50, 0, 0, highChar);
+
+	App->fonts->BlitText(0, 15, 0, scoreInd);
+	App->fonts->BlitText(50, 15, 0, scoreChar);
+
 	Debug();
+	
 	if (canLaunch && App->input->GetKey(SDL_SCANCODE_UP) == KEY_REPEAT)
 	{
 		circles.getFirst()->data->body->ApplyLinearImpulse(b2Vec2(0, -4.5f), circles.getFirst()->data->body->GetPosition(), true);
@@ -118,17 +135,15 @@ update_status ModuleSceneIntro::Update()
 	}
 
 	// If user presses SPACE, enable RayCast
-	if(App->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN)
-	{
-		// Enable raycast mode
-		ray_on = !ray_on;
-
-		// Origin point of the raycast is be the mouse current position now (will not change)
-		ray.x = App->input->GetMouseX();
-		ray.y = App->input->GetMouseY();
-	}
-
-	// If user presses 1, create a new circle object
+	//if(App->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN)
+	//{
+	//	// Enable raycast mode
+	//	ray_on = !ray_on;
+	//
+	//	// Origin point of the raycast is be the mouse current position now (will not change)
+	//	ray.x = App->input->GetMouseX();
+	//	ray.y = App->input->GetMouseY();
+	//}
 
 	if (spawn)
 	{
@@ -205,6 +220,7 @@ void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 		switch (bodyB->ctype) {
 		case ColliderType::BUMPER:
 			ApplyVectorImpulse(bodyA, bodyB);
+			score += 100;
 			break;
 		case ColliderType::WALL:
 			despawn = true;
