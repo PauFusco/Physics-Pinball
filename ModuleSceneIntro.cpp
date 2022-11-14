@@ -129,6 +129,17 @@ update_status ModuleSceneIntro::Update()
 		circles.getLast()->data->listener = this;
 	}	
 
+	if (spawn)
+	{
+		if (circles.getFirst() == nullptr) 	circles.add(App->physics->CreateCircle(App->input->GetMouseX(), App->input->GetMouseY(), 7));
+
+		circles.getLast()->data->ctype = ColliderType::BALL;
+
+		circles.getLast()->data->listener = this;
+
+		spawn = false;
+	}
+
 	// Prepare for raycast ------------------------------------------------------
 	
 	// The target point of the raycast is the mouse current position (will change over game time)
@@ -156,16 +167,6 @@ update_status ModuleSceneIntro::Update()
 		c = c->next;
 	}
 
-	//// Rick Heads
-	//c = ricks.getFirst();
-	//while(c != NULL)
-	//{
-	//	int x, y;
-	//	c->data->GetPosition(x, y);
-	//	App->renderer->Blit(rick, x, y, NULL, 1.0f, c->data->GetRotation());
-	//	c = c->next;
-	//}
-
 	// Raycasts -----------------
 	if(ray_on == true)
 	{
@@ -182,6 +183,15 @@ update_status ModuleSceneIntro::Update()
 			App->renderer->DrawLine(ray.x + destination.x, ray.y + destination.y, ray.x + destination.x + normal.x * 25.0f, ray.y + destination.y + normal.y * 25.0f, 100, 255, 100);
 	}
 	
+
+	if (despawn)
+	{
+		circles.getFirst()->data->body->DestroyFixture(circles.getFirst()->data->body->GetFixtureList());
+		circles.del(circles.getFirst());
+		despawn = false;
+		spawn = true;
+	}
+
 	int ballx, bally;
 	ballbod->GetPosition(ballx, bally);
 	App->renderer->Blit(ballTex, ballx - 7, bally - 7);
@@ -200,11 +210,9 @@ void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 			ApplyVectorImpulse(bodyA, bodyB);
 			break;
 		case ColliderType::WALL:
-			//circles.getFirst()->data->body->DestroyFixture();
-			circles.del(circles.getFirst());			
+			despawn = true;
 			break;
 		}
-
 	}
 }
 
@@ -307,7 +315,7 @@ void ModuleSceneIntro::ApplyVectorImpulse(PhysBody* bodyA, PhysBody* bodyB)
 
 	bodyA->body->SetLinearVelocity(b2Vec2(0, 0));
 
-	bodyA->body->ApplyLinearImpulse(0.03f * forceDir, bodyA->body->GetPosition(), true);
+	bodyA->body->ApplyLinearImpulse(0.02f * forceDir, bodyA->body->GetPosition(), true);
 
 	App->audio->PlayFx(bonus_fx);
 }
@@ -369,4 +377,10 @@ void ModuleSceneIntro::SetDespawnDetector()
 	yo->listener = this;
 	baseBody->SetUserData(yo);
 
+}
+
+void ModuleSceneIntro::DespawnBall()
+{
+	circles.getFirst()->data->body->DestroyFixture(circles.getFirst()->data->body->GetFixtureList());
+	circles.del(circles.getFirst());
 }

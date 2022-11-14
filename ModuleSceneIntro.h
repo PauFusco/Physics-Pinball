@@ -24,7 +24,7 @@ public:
 	void ApplyVectorImpulse(PhysBody* bodyA, PhysBody* bodyB);
 	void CreateBall(int x, int y);
 	void SetDespawnDetector();
-	//void DespawnBall();
+	void DespawnBall();
 
 public:
 
@@ -51,4 +51,7 @@ public:
 	bool ray_on;
 
 	int lifes;
+
+	bool despawn = false;
+	bool spawn = true;
 };
