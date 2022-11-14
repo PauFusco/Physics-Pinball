@@ -25,6 +25,7 @@ public:
 	void CreateBall(int x, int y);
 	void SetDespawnDetector();
 	void DespawnBall();
+	void SetLauncherFloor();
 
 public:
 

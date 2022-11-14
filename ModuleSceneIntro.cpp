@@ -71,6 +71,7 @@ bool ModuleSceneIntro::Start()
 	};
 	App->physics->CreateChain(0, 0, Waluigi_Pinball_Map, 65);
 
+
 	SetDespawnDetector();
 
 	SetBumpers(180, 425, SCREEN_WIDTH / 15);
@@ -90,7 +91,9 @@ bool ModuleSceneIntro::Start()
 
 	SetPallets();
 
-	CreateBall(SCREEN_WIDTH / 4,0 );
+	//CreateBall(SCREEN_WIDTH / 4,0 );
+
+	SetLauncherFloor();
 
 	//App->audio->PlayMusic("Wahssets/Audio/Waluigi_Theme.ogg");
 
@@ -120,19 +123,12 @@ update_status ModuleSceneIntro::Update()
 	}
 
 	// If user presses 1, create a new circle object
-	if(App->input->GetKey(SDL_SCANCODE_1) == KEY_DOWN)
-	{
-		if (circles.getFirst() == nullptr) 		circles.add(App->physics->CreateCircle(App->input->GetMouseX(), App->input->GetMouseY(), 7));
-	
-		circles.getLast()->data->ctype = ColliderType::BALL;
-		
-		circles.getLast()->data->listener = this;
-	}	
 
 	if (spawn)
 	{
-		if (circles.getFirst() == nullptr) 	circles.add(App->physics->CreateCircle(App->input->GetMouseX(), App->input->GetMouseY(), 7));
-
+		if (circles.getFirst() == nullptr) {
+			circles.add(App->physics->CreateCircle(437, 557, 7));
+		}
 		circles.getLast()->data->ctype = ColliderType::BALL;
 
 		circles.getLast()->data->listener = this;
@@ -182,7 +178,6 @@ update_status ModuleSceneIntro::Update()
 		if(normal.x != 0.0f)
 			App->renderer->DrawLine(ray.x + destination.x, ray.y + destination.y, ray.x + destination.x + normal.x * 25.0f, ray.y + destination.y + normal.y * 25.0f, 100, 255, 100);
 	}
-	
 
 	if (despawn)
 	{
@@ -192,9 +187,9 @@ update_status ModuleSceneIntro::Update()
 		spawn = true;
 	}
 
-	int ballx, bally;
-	ballbod->GetPosition(ballx, bally);
-	App->renderer->Blit(ballTex, ballx - 7, bally - 7);
+	//int ballx, bally;
+	//ballbod->GetPosition(ballx, bally);
+	//App->renderer->Blit(ballTex, ballx - 7, bally - 7);
 
 	// Keep playing
 	return UPDATE_CONTINUE;
@@ -383,4 +378,33 @@ void ModuleSceneIntro::DespawnBall()
 {
 	circles.getFirst()->data->body->DestroyFixture(circles.getFirst()->data->body->GetFixtureList());
 	circles.del(circles.getFirst());
+}
+
+void ModuleSceneIntro::SetLauncherFloor()
+{
+	int x = 438;
+	int y = 582;
+
+	b2BodyDef base;
+	base.type = b2_staticBody;
+	base.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
+
+	// Add this static body to the World
+	b2Body* baseBody = App->physics->world->CreateBody(&base);
+
+	b2PolygonShape shape;
+	shape.SetAsBox(PIXEL_TO_METERS(23), PIXEL_TO_METERS(9));
+
+	b2FixtureDef fixture;
+	fixture.shape = &shape;
+
+	baseBody->CreateFixture(&fixture);
+
+	PhysBody* yo = new PhysBody();
+	yo->body = baseBody;
+	baseBody->SetUserData(&yo);
+	yo->ctype = ColliderType::UNKNOWN;
+
+	yo->listener = this;
+	baseBody->SetUserData(yo);
 }
