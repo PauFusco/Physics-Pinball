@@ -123,14 +123,15 @@ update_status ModuleSceneIntro::Update()
 		score = 0;
 	}
 
-	string temp = to_string(score);
-	scoreChar = temp.c_str();
-	temp = to_string(highScore);
+	
+	string temp = to_string(highScore);
 	highChar = temp.c_str();
 
 	App->fonts->BlitText(0, 0, 0, highInd);
 	App->fonts->BlitText(50, 0, 0, highChar);
-
+	
+	temp = to_string(score);
+	scoreChar = temp.c_str();
 	App->fonts->BlitText(0, 15, 0, scoreInd);
 	App->fonts->BlitText(50, 15, 0, scoreChar);
 
@@ -230,7 +231,6 @@ void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 		case ColliderType::BUMPER:
 			ApplyVectorImpulse(bodyA, bodyB);
 			score += 100;
-			highScore += 10;
 			break;
 		case ColliderType::WALL:
 			despawn = true;
