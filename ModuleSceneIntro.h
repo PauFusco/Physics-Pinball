@@ -24,7 +24,9 @@ public:
 	void ApplyVectorImpulse(PhysBody* bodyA, PhysBody* bodyB);
 	void CreateBall(int x, int y);
 	void SetDespawnDetector();
-	//void DespawnBall();
+	void DespawnBall();
+	void SetLauncherFloor();
+	void Debug();
 
 public:
 
@@ -50,5 +52,28 @@ public:
 	p2Point<int> ray;
 	bool ray_on;
 
-	int lifes;
+	int lifes = 3;
+
+	// Points
+	int score = 0;
+	int highScore = 0;
+	
+	// Points as char
+	char* scoreInd = "SCORE ";
+	char* highInd =	 "HIGH ";
+	
+	// Point text
+	const char* highChar;
+	const char* scoreChar;
+
+
+
+	bool despawn = false;
+	bool spawn = true;
+	bool canLaunch = true;
+
+	float bumpImp = 0.015f;
+
+	char* fontPath = "Wahssets/Fonts/rtype_font3.png";
+	char* fontOrder = "! c,_./0123456789e;<>?ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 };

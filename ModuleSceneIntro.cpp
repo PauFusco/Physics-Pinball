@@ -6,6 +6,11 @@
 #include "ModuleTextures.h"
 #include "ModuleAudio.h"
 #include "ModulePhysics.h"
+#include "ModuleFonts.h"
+
+#include <string>
+
+using namespace std;
 
 ModuleSceneIntro::ModuleSceneIntro(Application* app, bool start_enabled) : Module(app, start_enabled)
 {
@@ -33,6 +38,8 @@ bool ModuleSceneIntro::Start()
 	background = App->textures->Load("Wahssets/Textures/Waluigi_Pinball_Map.png");
 
 	bonus_fx = App->audio->LoadFx("Wahssets/Audio/bonus.wav");
+
+	App->fonts->Load(fontPath, fontOrder, 2);
 
 	int Waluigi_Pinball_Map[66] = {
 	454, 639,
@@ -86,11 +93,11 @@ bool ModuleSceneIntro::Start()
 	SetBumpers(285, 570, SCREEN_WIDTH / 20);
 	
 	SetBumpers(439, 228, SCREEN_WIDTH / 10);
-	SetBumpers(47, 228, SCREEN_WIDTH / 10);
+	SetBumpers( 47, 228, SCREEN_WIDTH / 10);
 
 	SetPallets();
 
-	CreateBall(SCREEN_WIDTH / 4,0 );
+	SetLauncherFloor();
 
 	App->audio->PlayMusic("Wahssets/Audio/Waluigi_Theme.ogg");
 
@@ -109,26 +116,63 @@ update_status ModuleSceneIntro::Update()
 {
 	App->renderer->Blit(background, 0, 0);
 	
-	// If user presses SPACE, enable RayCast
-	if(App->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN)
+	if (lifes <= 0)
 	{
-		// Enable raycast mode
-		ray_on = !ray_on;
-
-		// Origin point of the raycast is be the mouse current position now (will not change)
-		ray.x = App->input->GetMouseX();
-		ray.y = App->input->GetMouseY();
+		lifes = 3;
+		highScore = score;
+		score = 0;
 	}
 
-	// If user presses 1, create a new circle object
-	if(App->input->GetKey(SDL_SCANCODE_1) == KEY_DOWN)
-	{
-		if (circles.getFirst() == nullptr) 		circles.add(App->physics->CreateCircle(App->input->GetMouseX(), App->input->GetMouseY(), 7));
+	string temp = to_string(score);
+	scoreChar = temp.c_str();
+	temp = to_string(highScore);
+	highChar = temp.c_str();
+
+	App->fonts->BlitText(0, 0, 0, highInd);
+	App->fonts->BlitText(50, 0, 0, highChar);
+
+	App->fonts->BlitText(0, 15, 0, scoreInd);
+	App->fonts->BlitText(50, 15, 0, scoreChar);
+
+	Debug();
 	
+	if (canLaunch && App->input->GetKey(SDL_SCANCODE_UP) == KEY_REPEAT)
+	{
+		circles.getFirst()->data->body->ApplyLinearImpulse(b2Vec2(0, -3.5f), circles.getFirst()->data->body->GetPosition(), true);
+		canLaunch = false;
+	}
+
+	// If user presses SPACE, enable RayCast
+	//if(App->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN)
+	//{
+	//	// Enable raycast mode
+	//	ray_on = !ray_on;
+	//
+	//	// Origin point of the raycast is be the mouse current position now (will not change)
+	//	ray.x = App->input->GetMouseX();
+	//	ray.y = App->input->GetMouseY();
+	//}
+
+	if (spawn)
+	{
+		if (circles.getFirst() == nullptr) {
+			circles.add(App->physics->CreateCircle(437, 557, 7));
+		}
 		circles.getLast()->data->ctype = ColliderType::BALL;
-		
+
 		circles.getLast()->data->listener = this;
-	}	
+
+		spawn = false;
+	}
+	
+	if (despawn)
+	{
+		circles.getFirst()->data->body->DestroyFixture(circles.getFirst()->data->body->GetFixtureList());
+		circles.del(circles.getFirst());
+		lifes--;
+		despawn = false;
+		spawn = true;
+	}
 
 	// Prepare for raycast ------------------------------------------------------
 	
@@ -157,16 +201,6 @@ update_status ModuleSceneIntro::Update()
 		c = c->next;
 	}
 
-	//// Rick Heads
-	//c = ricks.getFirst();
-	//while(c != NULL)
-	//{
-	//	int x, y;
-	//	c->data->GetPosition(x, y);
-	//	App->renderer->Blit(rick, x, y, NULL, 1.0f, c->data->GetRotation());
-	//	c = c->next;
-	//}
-
 	// Raycasts -----------------
 	if(ray_on == true)
 	{
@@ -182,10 +216,6 @@ update_status ModuleSceneIntro::Update()
 		if(normal.x != 0.0f)
 			App->renderer->DrawLine(ray.x + destination.x, ray.y + destination.y, ray.x + destination.x + normal.x * 25.0f, ray.y + destination.y + normal.y * 25.0f, 100, 255, 100);
 	}
-	
-	int ballx, bally;
-	ballbod->GetPosition(ballx, bally);
-	App->renderer->Blit(ballTex, ballx - 7, bally - 7);
 
 	// Keep playing
 	return UPDATE_CONTINUE;
@@ -199,13 +229,17 @@ void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 		switch (bodyB->ctype) {
 		case ColliderType::BUMPER:
 			ApplyVectorImpulse(bodyA, bodyB);
+			score += 100;
+			highScore += 10;
 			break;
 		case ColliderType::WALL:
-			//circles.getFirst()->data->body->DestroyFixture();
-			circles.del(circles.getFirst());			
+			despawn = true;
+			canLaunch = true;
+			break;
+		case ColliderType::LAUNCHER:
+			canLaunch = true;
 			break;
 		}
-
 	}
 }
 
@@ -308,7 +342,7 @@ void ModuleSceneIntro::ApplyVectorImpulse(PhysBody* bodyA, PhysBody* bodyB)
 
 	bodyA->body->SetLinearVelocity(b2Vec2(0, 0));
 
-	bodyA->body->ApplyLinearImpulse(0.03f * forceDir, bodyA->body->GetPosition(), true);
+	bodyA->body->ApplyLinearImpulse(bumpImp * forceDir, bodyA->body->GetPosition(), true);
 
 	App->audio->PlayFx(bonus_fx);
 }
@@ -370,4 +404,45 @@ void ModuleSceneIntro::SetDespawnDetector()
 	yo->listener = this;
 	baseBody->SetUserData(yo);
 
+}
+
+void ModuleSceneIntro::DespawnBall()
+{
+	circles.getFirst()->data->body->DestroyFixture(circles.getFirst()->data->body->GetFixtureList());
+	circles.del(circles.getFirst());
+}
+
+void ModuleSceneIntro::SetLauncherFloor()
+{
+	int x = 438;
+	int y = 582;
+
+	b2BodyDef launcher;
+	launcher.type = b2_staticBody;
+	launcher.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
+
+	// Add this static body to the World
+	b2Body* launcherBody = App->physics->world->CreateBody(&launcher);
+
+	b2PolygonShape shape;
+	shape.SetAsBox(PIXEL_TO_METERS(23), PIXEL_TO_METERS(9));
+
+	b2FixtureDef fixture;
+	fixture.shape = &shape;
+
+	launcherBody->CreateFixture(&fixture);
+
+	PhysBody* yo = new PhysBody();
+	yo->body = launcherBody;
+	launcherBody->SetUserData(&yo);
+	yo->ctype = ColliderType::LAUNCHER;
+
+	yo->listener = this;
+	launcherBody->SetUserData(yo);
+}
+
+void ModuleSceneIntro::Debug()
+{
+	if (App->input->GetKey(SDL_SCANCODE_F11)) bumpImp += 0.01f;
+	if (App->input->GetKey(SDL_SCANCODE_F10)) bumpImp -= 0.01f;
 }
