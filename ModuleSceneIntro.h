@@ -46,6 +46,7 @@ public:
 	// FX
 	uint bonus_fx;
 	uint death_fx;
+	uint launch_fx;
 
 	// Raycast
 	p2Point<int> ray;

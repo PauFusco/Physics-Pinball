@@ -41,6 +41,9 @@ bool ModuleSceneIntro::Start()
 
 	death_fx = App->audio->LoadFx("Wahssets/Audio/Wah.wav");
 
+	launch_fx = App->audio->LoadFx("Wahssets/Audio/Waluigi_Time.wav");
+
+
 	App->fonts->Load(fontPath, fontOrder, 2);
 
 	int Waluigi_Pinball_Map[66] = {
@@ -172,6 +175,7 @@ update_status ModuleSceneIntro::Update()
 	if (canLaunch && App->input->GetKey(SDL_SCANCODE_UP) == KEY_REPEAT)
 	{
 		circles.getFirst()->data->body->ApplyLinearImpulse(b2Vec2(0, -4.0f), circles.getFirst()->data->body->GetPosition(), true);
+		App->audio->PlayFx(launch_fx);
 		canLaunch = false;
 	}
 
@@ -275,6 +279,7 @@ void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 			break;
 		case ColliderType::LAUNCHER:
 			canLaunch = true;
+			/*App->audio->PlayFx(launch_fx);*/
 			break;
 		}
 	}
