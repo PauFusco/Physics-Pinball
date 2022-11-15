@@ -29,9 +29,7 @@ public:
 	void Debug();
 
 public:
-
 	p2List<PhysBody*> circles;
-	p2List<PhysBody*> ricks;
 
 	PhysBody* back;
 

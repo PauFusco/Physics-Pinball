@@ -169,7 +169,7 @@ update_status ModuleSceneIntro::Update()
 	
 	if (canLaunch && App->input->GetKey(SDL_SCANCODE_UP) == KEY_REPEAT)
 	{
-		circles.getFirst()->data->body->ApplyLinearImpulse(b2Vec2(0, -3.5f), circles.getFirst()->data->body->GetPosition(), true);
+		circles.getFirst()->data->body->ApplyLinearImpulse(b2Vec2(0, -4.0f), circles.getFirst()->data->body->GetPosition(), true);
 		canLaunch = false;
 	}
 
@@ -263,6 +263,7 @@ void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 		case ColliderType::BUMPER:
 			ApplyVectorImpulse(bodyA, bodyB);
 			score += 100;
+			App->audio->PlayFx(bonus_fx);
 			break;
 		case ColliderType::WALL:
 			despawn = true;
