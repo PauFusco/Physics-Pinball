@@ -37,7 +37,9 @@ bool ModuleSceneIntro::Start()
 
 	background = App->textures->Load("Wahssets/Textures/Waluigi_Pinball_Map.png");
 
-	bonus_fx = App->audio->LoadFx("Wahssets/Audio/bonus.wav");
+	bonus_fx = App->audio->LoadFx("Wahssets/Audio/Coin_Sound.wav");
+
+	death_fx = App->audio->LoadFx("Wahssets/Audio/Wah.wav");
 
 	App->fonts->Load(fontPath, fontOrder, 2);
 
@@ -198,6 +200,8 @@ update_status ModuleSceneIntro::Update()
 	{
 		circles.getFirst()->data->body->DestroyFixture(circles.getFirst()->data->body->GetFixtureList());
 		circles.del(circles.getFirst());
+
+		App->audio->PlayFx(death_fx);
 		lifes--;
 		despawn = false;
 		spawn = true;
