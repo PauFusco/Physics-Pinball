@@ -221,6 +221,7 @@ void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 		case ColliderType::BUMPER:
 			ApplyVectorImpulse(bodyA, bodyB);
 			score += 100;
+			highScore += 100;
 			break;
 		case ColliderType::WALL:
 			despawn = true;
