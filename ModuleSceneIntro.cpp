@@ -116,7 +116,7 @@ update_status ModuleSceneIntro::Update()
 {
 	App->renderer->Blit(background, 0, 0);
 	
-	if (lifes <= 0)
+	if (lifes < 0)
 	{
 		lifes = 3;
 		highScore = score;
@@ -134,6 +134,11 @@ update_status ModuleSceneIntro::Update()
 	scoreChar = temp.c_str();
 	App->fonts->BlitText(0, 15, 0, scoreInd);
 	App->fonts->BlitText(50, 15, 0, scoreChar);
+
+	temp = to_string(lifes);
+	lifesChar = temp.c_str();
+	App->fonts->BlitText(15, 370, 0, lifesInd);
+	App->fonts->BlitText(35, 370, 0, lifesChar);
 
 	Debug();
 	
@@ -157,7 +162,7 @@ update_status ModuleSceneIntro::Update()
 	if (spawn)
 	{
 		if (circles.getFirst() == nullptr) {
-			circles.add(App->physics->CreateCircle(437, 557, 7));
+			circles.add(App->physics->CreateCircle(437, 557, 7.5f));
 		}
 		circles.getLast()->data->ctype = ColliderType::BALL;
 
@@ -196,8 +201,12 @@ update_status ModuleSceneIntro::Update()
 	{
 		int x, y;
 		c->data->GetPosition(x, y);
-
-		App->renderer->Blit(ballTex, x, y);
+		SDL_Rect ballrect;
+		ballrect.x = 0;
+		ballrect.y = 0;
+		ballrect.w = 15;
+		ballrect.h = 15;
+		App->renderer->Blit(ballTex, x, y, &ballrect, 1.0f, c->data->GetRotation());
 
 		c = c->next;
 	}

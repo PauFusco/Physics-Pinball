@@ -61,10 +61,12 @@ public:
 	// Points as char
 	char* scoreInd = "SCORE ";
 	char* highInd =	 "HIGH ";
+	char* lifesInd = " X ";
 	
 	// Point text
 	const char* highChar;
 	const char* scoreChar;
+	const char* lifesChar;
 
 
 
