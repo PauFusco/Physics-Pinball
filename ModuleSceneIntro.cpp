@@ -78,6 +78,29 @@ bool ModuleSceneIntro::Start()
 	};
 	App->physics->CreateChain(0, 0, Waluigi_Pinball_Map, 65);
 
+	int MapBumpR[14] = {
+	332, 90,
+	317, 105,
+	358, 130,
+	377, 170,
+	382, 148,
+	382, 130,
+	353, 96
+	};
+	App->physics->CreateChain(0, 0, MapBumpR, 14);
+	
+	int MapBumpL[16] = {
+	155, 91,
+	131, 96,
+	104, 130,
+	104, 153,
+	113, 172,
+	127, 130,
+	142, 120,
+	177, 107
+	};
+	App->physics->CreateChain(0, 0, MapBumpL, 16);
+
 	SetDespawnDetector();
 
 	SetBumpers(180, 425, SCREEN_WIDTH / 15);
@@ -137,8 +160,10 @@ update_status ModuleSceneIntro::Update()
 
 	temp = to_string(lifes);
 	lifesChar = temp.c_str();
-	App->fonts->BlitText(15, 370, 0, lifesInd);
-	App->fonts->BlitText(35, 370, 0, lifesChar);
+	App->fonts->BlitText(35, 370, 0, lifesInd);
+	App->fonts->BlitText(55, 370, 0, lifesChar);
+
+	App->renderer->Blit(ballTex, 20, 367);
 
 	Debug();
 	
@@ -159,13 +184,11 @@ update_status ModuleSceneIntro::Update()
 	//	ray.y = App->input->GetMouseY();
 	//}
 
-	if (spawn)
+	if (spawn && circles.getFirst() == nullptr)
 	{
-		if (circles.getFirst() == nullptr) {
-			circles.add(App->physics->CreateCircle(437, 557, 7.5f));
-		}
+		circles.add(App->physics->CreateCircle(437, 557, 7.5f));
+		
 		circles.getLast()->data->ctype = ColliderType::BALL;
-
 		circles.getLast()->data->listener = this;
 
 		spawn = false;

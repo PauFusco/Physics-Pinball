@@ -1,5 +1,5 @@
 // Pivot 0, 0
-int Waluigi_Pinball_Map[64] = {
+int Waluigi_Pinball_Map[66] = {
 	454, 639,
 	454, 345,
 	474, 345,
@@ -36,7 +36,7 @@ int Waluigi_Pinball_Map[64] = {
 };
 
 // Pivot 0.000000, 0.000000
-float Waluigi_Pinball_Map[64] = {
+float Waluigi_Pinball_Map[66] = {
 	0.945833f, 0.998438f,
 	0.945833f, 0.539063f,
 	0.987500f, 0.539063f,
