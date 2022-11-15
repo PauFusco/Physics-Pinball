@@ -92,12 +92,13 @@ bool ModuleSceneIntro::Start()
 
 	CreateBall(SCREEN_WIDTH / 4,0 );
 
-	//App->audio->PlayMusic("Wahssets/Audio/Waluigi_Theme.ogg");
+	App->audio->PlayMusic("Wahssets/Audio/Waluigi_Theme.ogg");
 
 	return ret;
 }
 
 bool ModuleSceneIntro::CleanUp()
+
 {
 	LOG("Unloading Intro scene");
 
