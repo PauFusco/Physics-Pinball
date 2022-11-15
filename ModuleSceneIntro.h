@@ -52,7 +52,7 @@ public:
 	p2Point<int> ray;
 	bool ray_on;
 
-	int lifes;
+	int lifes = 3;
 
 	// Points
 	int score = 0;

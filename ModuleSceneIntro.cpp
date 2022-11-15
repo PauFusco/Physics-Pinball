@@ -115,6 +115,13 @@ update_status ModuleSceneIntro::Update()
 {
 	App->renderer->Blit(background, 0, 0);
 	
+	if (lifes <= 0)
+	{
+		lifes = 3;
+		highScore = score;
+		score = 0;
+	}
+
 	string temp = to_string(score);
 	scoreChar = temp.c_str();
 	temp = to_string(highScore);
@@ -130,7 +137,7 @@ update_status ModuleSceneIntro::Update()
 	
 	if (canLaunch && App->input->GetKey(SDL_SCANCODE_UP) == KEY_REPEAT)
 	{
-		circles.getFirst()->data->body->ApplyLinearImpulse(b2Vec2(0, -4.5f), circles.getFirst()->data->body->GetPosition(), true);
+		circles.getFirst()->data->body->ApplyLinearImpulse(b2Vec2(0, -3.5f), circles.getFirst()->data->body->GetPosition(), true);
 		canLaunch = false;
 	}
 
@@ -161,10 +168,11 @@ update_status ModuleSceneIntro::Update()
 	{
 		circles.getFirst()->data->body->DestroyFixture(circles.getFirst()->data->body->GetFixtureList());
 		circles.del(circles.getFirst());
+		lifes--;
 		despawn = false;
 		spawn = true;
 	}
-	
+
 	// Prepare for raycast ------------------------------------------------------
 	
 	// The target point of the raycast is the mouse current position (will change over game time)
@@ -221,7 +229,7 @@ void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 		case ColliderType::BUMPER:
 			ApplyVectorImpulse(bodyA, bodyB);
 			score += 100;
-			highScore += 100;
+			highScore += 10;
 			break;
 		case ColliderType::WALL:
 			despawn = true;
