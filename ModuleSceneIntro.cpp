@@ -172,7 +172,7 @@ update_status ModuleSceneIntro::Update()
 
 	Debug();
 	
-	if (canLaunch && App->input->GetKey(SDL_SCANCODE_UP) == KEY_REPEAT)
+	if (canLaunch && App->input->GetKey(SDL_SCANCODE_DOWN) == KEY_REPEAT)
 	{
 		circles.getFirst()->data->body->ApplyLinearImpulse(b2Vec2(0, -4.0f), circles.getFirst()->data->body->GetPosition(), true);
 		App->audio->PlayFx(launch_fx);
@@ -258,6 +258,8 @@ update_status ModuleSceneIntro::Update()
 			App->renderer->DrawLine(ray.x + destination.x, ray.y + destination.y, ray.x + destination.x + normal.x * 25.0f, ray.y + destination.y + normal.y * 25.0f, 100, 255, 100);
 	}
 
+	if (App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_REPEAT)	m_joint->EnableMotor(true);
+	else m_joint->EnableMotor(false);
 	// Keep playing
 	return UPDATE_CONTINUE;
 }
@@ -315,62 +317,52 @@ void ModuleSceneIntro::SetBumpers(int x, int y, int diameter)
 
 void ModuleSceneIntro::SetPallets()
 {
-	int x = SCREEN_WIDTH / 2 + 60;
-	int y = SCREEN_HEIGHT / 1.5f + 70;
+	//body and fixture defs - the common parts
+	b2BodyDef bodyDef1;
+	bodyDef1.type = b2_dynamicBody;
+	b2FixtureDef fixtureDef;
+	fixtureDef.density = 1;
 
-	b2BodyDef base;
-	base.type = b2_staticBody;
-	base.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
+	//two shapes
+	b2PolygonShape boxShape;
+	boxShape.SetAsBox(PIXEL_TO_METERS(10), PIXEL_TO_METERS(10));
+	
+	b2CircleShape circleShape;
+	circleShape.m_radius = 0.5f;
 
-	// Add this static body to the World
-	b2Body* baseBody = App->physics->world->CreateBody(&base);
+	//make box a little to the left
+	bodyDef1.position.Set(5, 10);
+	fixtureDef.shape = &boxShape;
+	b2Body* m_bodyA = App->physics->world->CreateBody(&bodyDef1);
+	m_bodyA->CreateFixture(&fixtureDef);
 
-	b2PolygonShape shape;
-	shape.SetAsBox(PIXEL_TO_METERS(20), PIXEL_TO_METERS(10));
+	b2BodyDef bodyDef2;
+	bodyDef1.type = b2_staticBody;
 
-	b2FixtureDef fixture;
-	fixture.shape = &shape;
+	//and circle a little to the right
+	bodyDef2.position.Set(7, 7);
+	fixtureDef.shape = &circleShape;
+	b2Body* m_bodyB = App->physics->world->CreateBody(&bodyDef2);
+	m_bodyB->CreateFixture(&fixtureDef);
 
-	baseBody->CreateFixture(&fixture);
-
-	PhysBody* yo = new PhysBody();
-	yo->body = baseBody;
-	baseBody->SetUserData(&yo);
-	yo->ctype = ColliderType::BUMPER;
-
-	yo->listener = this;
-	baseBody->SetUserData(yo);
-
-
-	x = SCREEN_WIDTH / 2 + 41;
-	y = SCREEN_HEIGHT / 1.5f + 70;
-
-	base.type = b2_dynamicBody;
-	base.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
-
-	// Add this static body to the World
-	b2Body* palaBody = App->physics->world->CreateBody(&base);
-
-	shape.SetAsBox(PIXEL_TO_METERS(20), PIXEL_TO_METERS(10));
-
-	fixture.shape = &shape;
-
-	palaBody->CreateFixture(&fixture);
-
-	yo = new PhysBody();
-	yo->body = palaBody;
-	palaBody->SetUserData(&yo);
-	yo->ctype = ColliderType::BUMPER;
-
-	yo->listener = this;
-	palaBody->SetUserData(yo);
 	b2RevoluteJointDef revoluteJointDef;
-	revoluteJointDef.bodyA = baseBody;
-	revoluteJointDef.bodyB = palaBody;
+	revoluteJointDef.bodyA = m_bodyA;
+	revoluteJointDef.bodyB = m_bodyB;
 	revoluteJointDef.collideConnected = false;
+	revoluteJointDef.localAnchorA.Set(2, 2);//the top right corner of the box
+	revoluteJointDef.localAnchorB.Set(0, 0);//center of the circle
 
-	revoluteJointDef.localAnchorA.Set(0, 0);
-	revoluteJointDef.localAnchorB.Set(PIXEL_TO_METERS(20), 0);
+	revoluteJointDef.enableLimit = true;
+	revoluteJointDef.lowerAngle = -45 * DEGTORAD;
+	revoluteJointDef.upperAngle = 45 * DEGTORAD;
+
+	revoluteJointDef.enableMotor = false;
+	revoluteJointDef.maxMotorTorque = 50;
+	revoluteJointDef.motorSpeed = -50;//90 degrees per second
+
+	m_joint = (b2RevoluteJoint*)App->physics->world->CreateJoint(&revoluteJointDef);
+
+		
 }
 
 void ModuleSceneIntro::ApplyVectorImpulse(PhysBody* bodyA, PhysBody* bodyB)

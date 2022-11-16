@@ -6,6 +6,8 @@
 
 class PhysBody;
 
+class b2RevoluteJoint;
+
 class ModuleSceneIntro : public Module
 {
 public:
@@ -68,7 +70,7 @@ public:
 	const char* scoreChar;
 	const char* lifesChar;
 
-
+	b2RevoluteJoint* m_joint;
 
 	bool despawn = false;
 	bool spawn = true;
