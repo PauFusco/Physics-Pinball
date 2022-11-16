@@ -127,7 +127,7 @@ bool ModuleSceneIntro::Start()
 
 	SetLauncherFloor();
 
-	App->audio->PlayMusic("Wahssets/Audio/Waluigi_Theme.ogg");
+	//App->audio->PlayMusic("Wahssets/Audio/Waluigi_Theme.ogg");
 
 	return ret;
 }
@@ -151,7 +151,6 @@ update_status ModuleSceneIntro::Update()
 		score = 0;
 	}
 
-	
 	string temp = to_string(highScore);
 	highChar = temp.c_str();
 
@@ -172,24 +171,9 @@ update_status ModuleSceneIntro::Update()
 
 	Debug();
 	
-	if (canLaunch && App->input->GetKey(SDL_SCANCODE_DOWN) == KEY_REPEAT)
-	{
-		circles.getFirst()->data->body->ApplyLinearImpulse(b2Vec2(0, -4.0f), circles.getFirst()->data->body->GetPosition(), true);
-		App->audio->PlayFx(launch_fx);
-		canLaunch = false;
-	}
+	
 
-	// If user presses SPACE, enable RayCast
-	//if(App->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN)
-	//{
-	//	// Enable raycast mode
-	//	ray_on = !ray_on;
-	//
-	//	// Origin point of the raycast is be the mouse current position now (will not change)
-	//	ray.x = App->input->GetMouseX();
-	//	ray.y = App->input->GetMouseY();
-	//}
-
+	// Spawn in launcher
 	if (spawn && circles.getFirst() == nullptr)
 	{
 		circles.add(App->physics->CreateCircle(437, 557, 7.5f));
@@ -200,6 +184,15 @@ update_status ModuleSceneIntro::Update()
 		spawn = false;
 	}
 	
+	// Launch
+	if (canLaunch && App->input->GetKey(SDL_SCANCODE_DOWN) == KEY_REPEAT)
+	{
+		circles.getFirst()->data->body->ApplyLinearImpulse(b2Vec2(0, -4.0f), circles.getFirst()->data->body->GetPosition(), true);
+		App->audio->PlayFx(launch_fx);
+		canLaunch = false;
+	}
+	
+	// diE
 	if (despawn)
 	{
 		circles.getFirst()->data->body->DestroyFixture(circles.getFirst()->data->body->GetFixtureList());
@@ -210,19 +203,6 @@ update_status ModuleSceneIntro::Update()
 		despawn = false;
 		spawn = true;
 	}
-
-	// Prepare for raycast ------------------------------------------------------
-	
-	// The target point of the raycast is the mouse current position (will change over game time)
-	iPoint mouse;
-	mouse.x = App->input->GetMouseX();
-	mouse.y = App->input->GetMouseY();
-
-	// Total distance of the raycast reference segment
-	int ray_hit = ray.DistanceTo(mouse);
-
-	// Declare a vector. We will draw the normal to the hit surface (if we hit something)
-	fVector normal(0.0f, 0.0f);
 
 	// All draw functions ------------------------------------------------------
 
@@ -242,24 +222,9 @@ update_status ModuleSceneIntro::Update()
 		c = c->next;
 	}
 
-	// Raycasts -----------------
-	if(ray_on == true)
-	{
-		// Compute the vector from the raycast origin up to the contact point (if we're hitting anything; otherwise this is the reference length)
-		fVector destination(mouse.x-ray.x, mouse.y-ray.y);
-		destination.Normalize();
-		destination *= ray_hit;
-
-		// Draw a line from origin to the hit point (or reference length if we are not hitting anything)
-		App->renderer->DrawLine(ray.x, ray.y, ray.x + destination.x, ray.y + destination.y, 255, 255, 255);
-
-		// If we are hitting something with the raycast, draw the normal vector to the contact point
-		if(normal.x != 0.0f)
-			App->renderer->DrawLine(ray.x + destination.x, ray.y + destination.y, ray.x + destination.x + normal.x * 25.0f, ray.y + destination.y + normal.y * 25.0f, 100, 255, 100);
-	}
-
-	if (App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_REPEAT)	m_joint->EnableMotor(true);
+	if (App->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_DOWN)	m_joint->EnableMotor(true);
 	else m_joint->EnableMotor(false);
+	
 	// Keep playing
 	return UPDATE_CONTINUE;
 }
@@ -317,6 +282,9 @@ void ModuleSceneIntro::SetBumpers(int x, int y, int diameter)
 
 void ModuleSceneIntro::SetPallets()
 {
+	int x, y;
+	x = 300, y = 610;
+
 	//body and fixture defs - the common parts
 	b2BodyDef bodyDef1;
 	bodyDef1.type = b2_dynamicBody;
@@ -325,13 +293,10 @@ void ModuleSceneIntro::SetPallets()
 
 	//two shapes
 	b2PolygonShape boxShape;
-	boxShape.SetAsBox(PIXEL_TO_METERS(10), PIXEL_TO_METERS(10));
-	
-	b2CircleShape circleShape;
-	circleShape.m_radius = 0.5f;
+	boxShape.SetAsBox(0.5f, 0.3f);
 
 	//make box a little to the left
-	bodyDef1.position.Set(5, 10);
+	bodyDef1.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
 	fixtureDef.shape = &boxShape;
 	b2Body* m_bodyA = App->physics->world->CreateBody(&bodyDef1);
 	m_bodyA->CreateFixture(&fixtureDef);
@@ -339,9 +304,10 @@ void ModuleSceneIntro::SetPallets()
 	b2BodyDef bodyDef2;
 	bodyDef1.type = b2_staticBody;
 
-	//and circle a little to the right
-	bodyDef2.position.Set(7, 7);
-	fixtureDef.shape = &circleShape;
+	
+	bodyDef2.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
+	fixtureDef.shape = &boxShape;
+
 	b2Body* m_bodyB = App->physics->world->CreateBody(&bodyDef2);
 	m_bodyB->CreateFixture(&fixtureDef);
 
@@ -349,20 +315,26 @@ void ModuleSceneIntro::SetPallets()
 	revoluteJointDef.bodyA = m_bodyA;
 	revoluteJointDef.bodyB = m_bodyB;
 	revoluteJointDef.collideConnected = false;
-	revoluteJointDef.localAnchorA.Set(2, 2);//the top right corner of the box
-	revoluteJointDef.localAnchorB.Set(0, 0);//center of the circle
+	revoluteJointDef.localAnchorA.Set(0.5f, 0);//the top right corner of the box
+	revoluteJointDef.localAnchorB.Set(-0.5f, 0);//center of the box
 
 	revoluteJointDef.enableLimit = true;
-	revoluteJointDef.lowerAngle = -45 * DEGTORAD;
-	revoluteJointDef.upperAngle = 45 * DEGTORAD;
+	revoluteJointDef.lowerAngle = -30 * DEGTORAD;
+	revoluteJointDef.upperAngle = 0 * DEGTORAD;
 
 	revoluteJointDef.enableMotor = false;
-	revoluteJointDef.maxMotorTorque = 50;
-	revoluteJointDef.motorSpeed = -50;//90 degrees per second
+	revoluteJointDef.maxMotorTorque = 100;
+	revoluteJointDef.motorSpeed = -5;//90 degrees per second
 
 	m_joint = (b2RevoluteJoint*)App->physics->world->CreateJoint(&revoluteJointDef);
 
-		
+	PhysBody* base = new PhysBody();
+	PhysBody* pallet = new PhysBody();
+	base->body = m_bodyA;
+	pallet->body = m_bodyB;
+
+	base->ctype = ColliderType::WALL;
+	pallet->ctype = ColliderType::PALLET;
 }
 
 void ModuleSceneIntro::ApplyVectorImpulse(PhysBody* bodyA, PhysBody* bodyB)
