@@ -106,6 +106,22 @@ bool ModuleSceneIntro::Start()
 	};
 	App->physics->CreateChain(0, 0, MapBumpL, 16);
 
+	int PalletBodyL[8] = {
+		121, 533,
+		125, 524,
+		168, 613,
+		159, 620
+	};
+	App->physics->CreateChain(0, 0, PalletBodyL, 8);
+	
+	int PalletBodyR[8] = {
+		361, 524,
+		365, 533,
+		327, 621,
+		318, 613
+	};
+	App->physics->CreateChain(0, 0, PalletBodyR, 8);
+	
 	SetDespawnDetector();
 
 	SetBumpers(180, 425, SCREEN_WIDTH / 15);
@@ -120,10 +136,11 @@ bool ModuleSceneIntro::Start()
 	SetBumpers(195, 570, SCREEN_WIDTH / 20);
 	SetBumpers(285, 570, SCREEN_WIDTH / 20);
 	
-	SetBumpers(439, 228, SCREEN_WIDTH / 10);
-	SetBumpers( 47, 228, SCREEN_WIDTH / 10);
+	SetBumpers(439, 230, SCREEN_WIDTH / 9);
+	SetBumpers( 45, 233, SCREEN_WIDTH / 8);
 
-	SetPallets();
+	SetPalletR();
+	SetPalletL();
 
 	SetLauncherFloor();
 
@@ -142,7 +159,7 @@ bool ModuleSceneIntro::CleanUp()
 
 update_status ModuleSceneIntro::Update()
 {
-	App->renderer->Blit(background, 0, 0);
+	if (renderBack)	App->renderer->Blit(background, 0, 0);
 	
 	if (lifes < 0)
 	{
@@ -170,8 +187,6 @@ update_status ModuleSceneIntro::Update()
 	App->renderer->Blit(ballTex, 20, 367);
 
 	Debug();
-	
-	
 
 	// Spawn in launcher
 	if (spawn && circles.getFirst() == nullptr)
@@ -222,8 +237,11 @@ update_status ModuleSceneIntro::Update()
 		c = c->next;
 	}
 
-	if (App->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_DOWN)	m_joint->EnableMotor(true);
-	else m_joint->EnableMotor(false);
+	if (App->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_REPEAT) m_jointR->EnableMotor(true);
+	else m_jointR->EnableMotor(false);
+	
+	if (App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_REPEAT) m_jointL->EnableMotor(true);
+	else m_jointL->EnableMotor(false);
 	
 	// Keep playing
 	return UPDATE_CONTINUE;
@@ -247,6 +265,9 @@ void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 		case ColliderType::LAUNCHER:
 			canLaunch = true;
 			/*App->audio->PlayFx(launch_fx);*/
+			break;
+
+		case ColliderType::PALLET:
 			break;
 		}
 	}
@@ -280,10 +301,10 @@ void ModuleSceneIntro::SetBumpers(int x, int y, int diameter)
 	ballin->listener = this;
 }
 
-void ModuleSceneIntro::SetPallets()
+void ModuleSceneIntro::SetPalletR()
 {
 	int x, y;
-	x = 300, y = 610;
+	x = 320, y = 620;
 
 	//body and fixture defs - the common parts
 	b2BodyDef bodyDef1;
@@ -292,21 +313,24 @@ void ModuleSceneIntro::SetPallets()
 	fixtureDef.density = 1;
 
 	//two shapes
-	b2PolygonShape boxShape;
-	boxShape.SetAsBox(0.5f, 0.3f);
+	b2PolygonShape boxShapebig;
+	boxShapebig.SetAsBox(PIXEL_TO_METERS(25), PIXEL_TO_METERS(5));
+
+	b2PolygonShape boxShapesmol;
+	boxShapesmol.SetAsBox(PIXEL_TO_METERS(5), PIXEL_TO_METERS(2));
+
 
 	//make box a little to the left
 	bodyDef1.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
-	fixtureDef.shape = &boxShape;
+	fixtureDef.shape = &boxShapebig;
 	b2Body* m_bodyA = App->physics->world->CreateBody(&bodyDef1);
 	m_bodyA->CreateFixture(&fixtureDef);
 
 	b2BodyDef bodyDef2;
 	bodyDef1.type = b2_staticBody;
 
-	
 	bodyDef2.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
-	fixtureDef.shape = &boxShape;
+	fixtureDef.shape = &boxShapesmol;
 
 	b2Body* m_bodyB = App->physics->world->CreateBody(&bodyDef2);
 	m_bodyB->CreateFixture(&fixtureDef);
@@ -316,24 +340,202 @@ void ModuleSceneIntro::SetPallets()
 	revoluteJointDef.bodyB = m_bodyB;
 	revoluteJointDef.collideConnected = false;
 	revoluteJointDef.localAnchorA.Set(0.5f, 0);//the top right corner of the box
-	revoluteJointDef.localAnchorB.Set(-0.5f, 0);//center of the box
+	revoluteJointDef.localAnchorB.Set(-0.1, 0);//center of the box
 
 	revoluteJointDef.enableLimit = true;
-	revoluteJointDef.lowerAngle = -30 * DEGTORAD;
-	revoluteJointDef.upperAngle = 0 * DEGTORAD;
+	revoluteJointDef.lowerAngle = -45 * DEGTORAD;
+	revoluteJointDef.upperAngle = 10 * DEGTORAD;
 
 	revoluteJointDef.enableMotor = false;
-	revoluteJointDef.maxMotorTorque = 100;
+	revoluteJointDef.maxMotorTorque = 1000;
 	revoluteJointDef.motorSpeed = -5;//90 degrees per second
 
-	m_joint = (b2RevoluteJoint*)App->physics->world->CreateJoint(&revoluteJointDef);
+	m_jointR = (b2RevoluteJoint*)App->physics->world->CreateJoint(&revoluteJointDef);
 
 	PhysBody* base = new PhysBody();
 	PhysBody* pallet = new PhysBody();
 	base->body = m_bodyA;
 	pallet->body = m_bodyB;
 
-	base->ctype = ColliderType::WALL;
+	m_bodyA->SetUserData(base);
+	m_bodyB->SetUserData(pallet);
+
+	base->ctype = ColliderType::PALLET;
+	pallet->ctype = ColliderType::PALLET;
+
+//int PalletBodyR[8] = {
+	//	361, 524,
+	//	365, 533,
+	//	327, 621,
+	//	318, 613
+	//};
+	//b2BodyDef body;
+	//body.type = b2_staticBody;
+	//body.position.Set(PIXEL_TO_METERS(0), PIXEL_TO_METERS(0));
+	//
+	//// Add BODY to the world
+	//b2Body* b = App->physics->world->CreateBody(&body);
+	//
+	//// Create SHAPE
+	//b2ChainShape shape;
+	//b2Vec2* p = new b2Vec2[8 / 2];
+	//for (uint i = 0; i < 8 / 2; ++i)
+	//{
+	//	p[i].x = PIXEL_TO_METERS(PalletBodyR[i * 2 + 0]);
+	//	p[i].y = PIXEL_TO_METERS(PalletBodyR[i * 2 + 1]);
+	//}
+	//shape.CreateLoop(p, 8 / 2);
+	//
+	//// Create FIXTURE
+	//b2FixtureDef fixture;
+	//fixture.shape = &shape;
+	//fixture.friction = 0.1f;
+	//fixture.density = 1;
+	//
+	//// Add fixture to the BODY
+	//b->CreateFixture(&fixture);
+	//
+	//// Clean-up temp array
+	//delete p;
+	//
+	//// Create our custom PhysBody class
+	//PhysBody* pbody = new PhysBody();
+	//pbody->body = b;
+	//b->SetUserData(pbody);
+	//pbody->width = pbody->height = 0;
+	//pbody->ctype = ColliderType::WALL;
+	//// ---------------------------------------------------------
+	//
+	//int PalasR[10] = {
+	//	116, 0,
+	//	168, 4,
+	//	170, 10,
+	//	166, 13,
+	//	93, 0
+	//};
+	//b2BodyDef bodyb;
+	//bodyb.type = b2_dynamicBody;
+	//bodyb.position.Set(PIXEL_TO_METERS(145), PIXEL_TO_METERS(607));
+	//
+	//// Add BODY to the world
+	//b2Body* bb = App->physics->world->CreateBody(&bodyb);
+	//
+	//// Create SHAPE
+	//b2ChainShape shapeb;
+	//p = new b2Vec2[10 / 2];
+	//for (uint i = 0; i < 10 / 2; ++i)
+	//{
+	//	p[i].x = PIXEL_TO_METERS(PalasR[i * 2 + 0]);
+	//	p[i].y = PIXEL_TO_METERS(PalasR[i * 2 + 1]);
+	//}
+	//shapeb.CreateLoop(p, 10 / 2);
+	//
+	//// Create FIXTURE
+	//b2FixtureDef fixtureb;
+	//fixtureb.shape = &shapeb;
+	//fixtureb.friction = 0.1f;
+	//fixture.density = 1;
+	//
+	//// Add fixture to the BODY
+	//bb->CreateFixture(&fixtureb);
+	//
+	//// Clean-up temp array
+	//delete p;
+	//
+	//// Create our custom PhysBody class
+	//PhysBody* pbodyb = new PhysBody();
+	//pbodyb->body = bb;
+	//bb->SetUserData(pbodyb);
+	//pbodyb->width = pbodyb->height = 0;
+	//pbodyb->ctype = ColliderType::PALLET;
+	//// Return our PhysBody class
+	//
+	//b2RevoluteJointDef revoluteJointDef;
+	//revoluteJointDef.bodyA = b;
+	//revoluteJointDef.bodyB = bb;
+	//revoluteJointDef.collideConnected = false;
+	//revoluteJointDef.localAnchorA.Set(PIXEL_TO_METERS(130), PIXEL_TO_METERS(635));
+	//revoluteJointDef.localAnchorB.Set(-0.5f, 0);
+	//
+	//revoluteJointDef.enableLimit = true;
+	//revoluteJointDef.lowerAngle = -360 * DEGTORAD;
+	//revoluteJointDef.upperAngle = 360 * DEGTORAD;
+	//
+	//revoluteJointDef.enableMotor = true;
+	//revoluteJointDef.maxMotorTorque = 1000000000;
+	//revoluteJointDef.motorSpeed = 5;//90 degrees per second
+	//
+	//m_joint = (b2RevoluteJoint*)App->physics->world->CreateJoint(&revoluteJointDef);
+	//
+	//PhysBody* base = new PhysBody();
+	//PhysBody* pallet = new PhysBody();
+	//base->body = b;
+	//pallet->body = bb;
+	//
+	//base->ctype = ColliderType::WALL;
+	//pallet->ctype = ColliderType::PALLET;
+}
+
+void ModuleSceneIntro::SetPalletL()
+{
+	int x, y;
+	x = 165, y = 620;
+
+	//body and fixture defs - the common parts
+	b2BodyDef bodyDef1;
+	bodyDef1.type = b2_dynamicBody;
+	b2FixtureDef fixtureDef;
+	fixtureDef.density = 1;
+
+	//two shapes
+	b2PolygonShape boxShapebig;
+	boxShapebig.SetAsBox(PIXEL_TO_METERS(25), PIXEL_TO_METERS(5));
+	
+	b2PolygonShape boxShapesmol;
+	boxShapesmol.SetAsBox(PIXEL_TO_METERS(5), PIXEL_TO_METERS(2));
+	
+	//make box a little to the left
+	bodyDef1.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
+	fixtureDef.shape = &boxShapebig;
+	b2Body* m_bodyA = App->physics->world->CreateBody(&bodyDef1);
+	m_bodyA->CreateFixture(&fixtureDef);
+
+	b2BodyDef bodyDef2;
+	bodyDef2.type = b2_staticBody;
+
+
+	bodyDef2.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
+	fixtureDef.shape = &boxShapesmol;
+
+	b2Body* m_bodyB = App->physics->world->CreateBody(&bodyDef2);
+	m_bodyB->CreateFixture(&fixtureDef);
+
+	b2RevoluteJointDef revoluteJointDef;
+	revoluteJointDef.bodyA = m_bodyA;
+	revoluteJointDef.bodyB = m_bodyB;
+	revoluteJointDef.collideConnected = false;
+	revoluteJointDef.localAnchorA.Set(-0.5f, 0);//the top right corner of the box
+	revoluteJointDef.localAnchorB.Set(0.1, 0);//center of the box
+
+	revoluteJointDef.enableLimit = true;
+	revoluteJointDef.lowerAngle = -10 * DEGTORAD;
+	revoluteJointDef.upperAngle = 45 * DEGTORAD;
+
+	revoluteJointDef.enableMotor = false;
+	revoluteJointDef.maxMotorTorque = 1000;
+	revoluteJointDef.motorSpeed = 5;//90 degrees per second
+
+	m_jointL = (b2RevoluteJoint*)App->physics->world->CreateJoint(&revoluteJointDef);
+
+	PhysBody* base = new PhysBody();
+	PhysBody* pallet = new PhysBody();
+	base->body = m_bodyA;
+	pallet->body = m_bodyB;
+
+	m_bodyA->SetUserData(base);
+	m_bodyB->SetUserData(pallet);
+
+	base->ctype = ColliderType::PALLET;
 	pallet->ctype = ColliderType::PALLET;
 }
 
@@ -385,7 +587,7 @@ void ModuleSceneIntro::CreateBall(int x, int y)
 void ModuleSceneIntro::SetDespawnDetector()
 {
 	int x = 0;
-	int y = SCREEN_HEIGHT - 5;
+	int y = SCREEN_HEIGHT+5;
 
 	b2BodyDef base;
 	base.type = b2_staticBody;
@@ -449,6 +651,8 @@ void ModuleSceneIntro::SetLauncherFloor()
 
 void ModuleSceneIntro::Debug()
 {
-	if (App->input->GetKey(SDL_SCANCODE_F11)) bumpImp += 0.01f;
-	if (App->input->GetKey(SDL_SCANCODE_F10)) bumpImp -= 0.01f;
+	if (App->input->GetKey(SDL_SCANCODE_F11) == KEY_DOWN) bumpImp += 0.01f;
+	if (App->input->GetKey(SDL_SCANCODE_F10) == KEY_DOWN) bumpImp -= 0.01f;
+
+	if (App->input->GetKey(SDL_SCANCODE_F2) == KEY_DOWN) renderBack = !renderBack;
 }

@@ -22,7 +22,8 @@ public:
 	bool CleanUp();
 	void OnCollision(PhysBody* bodyA, PhysBody* bodyB);
 	void SetBumpers(int x, int y, int diameter);
-	void SetPallets();
+	void SetPalletR();
+	void SetPalletL();
 	void ApplyVectorImpulse(PhysBody* bodyA, PhysBody* bodyB);
 	void CreateBall(int x, int y);
 	void SetDespawnDetector();
@@ -70,7 +71,8 @@ public:
 	const char* scoreChar;
 	const char* lifesChar;
 
-	b2RevoluteJoint* m_joint;
+	b2RevoluteJoint* m_jointR;
+	b2RevoluteJoint* m_jointL;
 
 	bool despawn = false;
 	bool spawn = true;
@@ -80,4 +82,6 @@ public:
 
 	char* fontPath = "Wahssets/Fonts/rtype_font3.png";
 	char* fontOrder = "! c,_./0123456789e;<>?ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+	bool renderBack = true;
 };
