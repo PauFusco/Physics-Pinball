@@ -37,6 +37,8 @@ bool ModuleSceneIntro::Start()
 
 	background = App->textures->Load("Wahssets/Textures/Waluigi_Pinball_Map.png");
 
+	pallets = App->textures->Load("Wahssets/Textures/Palas.png");
+
 	bonus_fx = App->audio->LoadFx("Wahssets/Audio/Coin_Sound.wav");
 
 	death_fx = App->audio->LoadFx("Wahssets/Audio/Wah.wav");
@@ -237,11 +239,27 @@ update_status ModuleSceneIntro::Update()
 		c = c->next;
 	}
 
-	if (App->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_REPEAT) m_jointR->EnableMotor(true);
-	else m_jointR->EnableMotor(false);
+	
 	
 	if (App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_REPEAT) m_jointL->EnableMotor(true);
 	else m_jointL->EnableMotor(false);
+	
+	float angle = m_jointR->GetBodyA()->GetAngle();
+	
+	SDL_Rect* pallet = new SDL_Rect;
+	pallet->x = 93, pallet->y = 0, pallet->w = 77, pallet->h = 16;
+	
+	App->renderer->Blit(pallets, 245, 613, pallet, 1, RADTODEG * angle, 72, 8);
+
+	
+	if (App->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_REPEAT) m_jointR->EnableMotor(true);
+	else m_jointR->EnableMotor(false);
+	
+	angle = m_jointL->GetBodyA()->GetAngle();
+
+	pallet->x = 0, pallet->y = 0, pallet->w = 77, pallet->h = 16;
+
+	App->renderer->Blit(pallets, 165, 613, pallet, 1, RADTODEG * angle, 5, 8);
 	
 	// Keep playing
 	return UPDATE_CONTINUE;
@@ -314,7 +332,7 @@ void ModuleSceneIntro::SetPalletR()
 
 	//two shapes
 	b2PolygonShape boxShapebig;
-	boxShapebig.SetAsBox(PIXEL_TO_METERS(25), PIXEL_TO_METERS(5));
+	boxShapebig.SetAsBox(PIXEL_TO_METERS(35), PIXEL_TO_METERS(5));
 
 	b2PolygonShape boxShapesmol;
 	boxShapesmol.SetAsBox(PIXEL_TO_METERS(5), PIXEL_TO_METERS(2));
@@ -339,7 +357,7 @@ void ModuleSceneIntro::SetPalletR()
 	revoluteJointDef.bodyA = m_bodyA;
 	revoluteJointDef.bodyB = m_bodyB;
 	revoluteJointDef.collideConnected = false;
-	revoluteJointDef.localAnchorA.Set(0.5f, 0);//the top right corner of the box
+	revoluteJointDef.localAnchorA.Set(0.7f, 0);//the top right corner of the box
 	revoluteJointDef.localAnchorB.Set(-0.1, 0);//center of the box
 
 	revoluteJointDef.enableLimit = true;
@@ -362,118 +380,6 @@ void ModuleSceneIntro::SetPalletR()
 
 	base->ctype = ColliderType::PALLET;
 	pallet->ctype = ColliderType::PALLET;
-
-//int PalletBodyR[8] = {
-	//	361, 524,
-	//	365, 533,
-	//	327, 621,
-	//	318, 613
-	//};
-	//b2BodyDef body;
-	//body.type = b2_staticBody;
-	//body.position.Set(PIXEL_TO_METERS(0), PIXEL_TO_METERS(0));
-	//
-	//// Add BODY to the world
-	//b2Body* b = App->physics->world->CreateBody(&body);
-	//
-	//// Create SHAPE
-	//b2ChainShape shape;
-	//b2Vec2* p = new b2Vec2[8 / 2];
-	//for (uint i = 0; i < 8 / 2; ++i)
-	//{
-	//	p[i].x = PIXEL_TO_METERS(PalletBodyR[i * 2 + 0]);
-	//	p[i].y = PIXEL_TO_METERS(PalletBodyR[i * 2 + 1]);
-	//}
-	//shape.CreateLoop(p, 8 / 2);
-	//
-	//// Create FIXTURE
-	//b2FixtureDef fixture;
-	//fixture.shape = &shape;
-	//fixture.friction = 0.1f;
-	//fixture.density = 1;
-	//
-	//// Add fixture to the BODY
-	//b->CreateFixture(&fixture);
-	//
-	//// Clean-up temp array
-	//delete p;
-	//
-	//// Create our custom PhysBody class
-	//PhysBody* pbody = new PhysBody();
-	//pbody->body = b;
-	//b->SetUserData(pbody);
-	//pbody->width = pbody->height = 0;
-	//pbody->ctype = ColliderType::WALL;
-	//// ---------------------------------------------------------
-	//
-	//int PalasR[10] = {
-	//	116, 0,
-	//	168, 4,
-	//	170, 10,
-	//	166, 13,
-	//	93, 0
-	//};
-	//b2BodyDef bodyb;
-	//bodyb.type = b2_dynamicBody;
-	//bodyb.position.Set(PIXEL_TO_METERS(145), PIXEL_TO_METERS(607));
-	//
-	//// Add BODY to the world
-	//b2Body* bb = App->physics->world->CreateBody(&bodyb);
-	//
-	//// Create SHAPE
-	//b2ChainShape shapeb;
-	//p = new b2Vec2[10 / 2];
-	//for (uint i = 0; i < 10 / 2; ++i)
-	//{
-	//	p[i].x = PIXEL_TO_METERS(PalasR[i * 2 + 0]);
-	//	p[i].y = PIXEL_TO_METERS(PalasR[i * 2 + 1]);
-	//}
-	//shapeb.CreateLoop(p, 10 / 2);
-	//
-	//// Create FIXTURE
-	//b2FixtureDef fixtureb;
-	//fixtureb.shape = &shapeb;
-	//fixtureb.friction = 0.1f;
-	//fixture.density = 1;
-	//
-	//// Add fixture to the BODY
-	//bb->CreateFixture(&fixtureb);
-	//
-	//// Clean-up temp array
-	//delete p;
-	//
-	//// Create our custom PhysBody class
-	//PhysBody* pbodyb = new PhysBody();
-	//pbodyb->body = bb;
-	//bb->SetUserData(pbodyb);
-	//pbodyb->width = pbodyb->height = 0;
-	//pbodyb->ctype = ColliderType::PALLET;
-	//// Return our PhysBody class
-	//
-	//b2RevoluteJointDef revoluteJointDef;
-	//revoluteJointDef.bodyA = b;
-	//revoluteJointDef.bodyB = bb;
-	//revoluteJointDef.collideConnected = false;
-	//revoluteJointDef.localAnchorA.Set(PIXEL_TO_METERS(130), PIXEL_TO_METERS(635));
-	//revoluteJointDef.localAnchorB.Set(-0.5f, 0);
-	//
-	//revoluteJointDef.enableLimit = true;
-	//revoluteJointDef.lowerAngle = -360 * DEGTORAD;
-	//revoluteJointDef.upperAngle = 360 * DEGTORAD;
-	//
-	//revoluteJointDef.enableMotor = true;
-	//revoluteJointDef.maxMotorTorque = 1000000000;
-	//revoluteJointDef.motorSpeed = 5;//90 degrees per second
-	//
-	//m_joint = (b2RevoluteJoint*)App->physics->world->CreateJoint(&revoluteJointDef);
-	//
-	//PhysBody* base = new PhysBody();
-	//PhysBody* pallet = new PhysBody();
-	//base->body = b;
-	//pallet->body = bb;
-	//
-	//base->ctype = ColliderType::WALL;
-	//pallet->ctype = ColliderType::PALLET;
 }
 
 void ModuleSceneIntro::SetPalletL()
@@ -489,7 +395,7 @@ void ModuleSceneIntro::SetPalletL()
 
 	//two shapes
 	b2PolygonShape boxShapebig;
-	boxShapebig.SetAsBox(PIXEL_TO_METERS(25), PIXEL_TO_METERS(5));
+	boxShapebig.SetAsBox(PIXEL_TO_METERS(35), PIXEL_TO_METERS(5));
 	
 	b2PolygonShape boxShapesmol;
 	boxShapesmol.SetAsBox(PIXEL_TO_METERS(5), PIXEL_TO_METERS(2));
@@ -514,7 +420,7 @@ void ModuleSceneIntro::SetPalletL()
 	revoluteJointDef.bodyA = m_bodyA;
 	revoluteJointDef.bodyB = m_bodyB;
 	revoluteJointDef.collideConnected = false;
-	revoluteJointDef.localAnchorA.Set(-0.5f, 0);//the top right corner of the box
+	revoluteJointDef.localAnchorA.Set(-0.7f, 0);//the top right corner of the box
 	revoluteJointDef.localAnchorB.Set(0.1, 0);//center of the box
 
 	revoluteJointDef.enableLimit = true;

@@ -45,6 +45,7 @@ public:
 	// Textures
 	SDL_Texture* ballTex;
 	SDL_Texture* background;
+	SDL_Texture* pallets;
 
 	// FX
 	uint bonus_fx;
