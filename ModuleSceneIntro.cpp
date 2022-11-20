@@ -166,14 +166,13 @@ update_status ModuleSceneIntro::Update()
 	if (lifes < 0)
 	{
 		lifes = 3;
-		if (highScore > score) highScore = score;
+		if (highScore < score) highScore = score;
 		prevScore = score;
 		score = 0;
 	}
 
 	string temp = to_string(highScore);
 	highChar = temp.c_str();
-
 	App->fonts->BlitText(0, 0, 0, highInd);
 	App->fonts->BlitText(50, 0, 0, highChar);
 	
@@ -182,7 +181,10 @@ update_status ModuleSceneIntro::Update()
 	App->fonts->BlitText(0, 15, 0, scoreInd);
 	App->fonts->BlitText(50, 15, 0, scoreChar);
 
-
+	temp = to_string(prevScore);
+	prevChar = temp.c_str();
+	App->fonts->BlitText(0, 30, 0, prevInd);
+	App->fonts->BlitText(50, 30, 0, prevChar);
 
 	temp = to_string(lifes);
 	lifesChar = temp.c_str();
@@ -369,7 +371,7 @@ void ModuleSceneIntro::SetPalletR()
 
 	revoluteJointDef.enableMotor = false;
 	revoluteJointDef.maxMotorTorque = 1000;
-	revoluteJointDef.motorSpeed = -5;//90 degrees per second
+	revoluteJointDef.motorSpeed = -10;//90 degrees per second
 
 	m_jointR = (b2RevoluteJoint*)App->physics->world->CreateJoint(&revoluteJointDef);
 
@@ -432,7 +434,7 @@ void ModuleSceneIntro::SetPalletL()
 
 	revoluteJointDef.enableMotor = false;
 	revoluteJointDef.maxMotorTorque = 1000;
-	revoluteJointDef.motorSpeed = 5;//90 degrees per second
+	revoluteJointDef.motorSpeed = 10;//90 degrees per second
 
 	m_jointL = (b2RevoluteJoint*)App->physics->world->CreateJoint(&revoluteJointDef);
 
