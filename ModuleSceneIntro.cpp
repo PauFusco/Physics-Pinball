@@ -146,7 +146,7 @@ bool ModuleSceneIntro::Start()
 
 	SetLauncherFloor();
 
-	//App->audio->PlayMusic("Wahssets/Audio/Waluigi_Theme.ogg");
+	App->audio->PlayMusic("Wahssets/Audio/Waluigi_Theme.ogg");
 
 	return ret;
 }
