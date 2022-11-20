@@ -1,5 +1,5 @@
 # Physics-Pinball
-This Pinball is based on the Mario Kart course Waluigi Pinball, the sprites are handmade from the elements of that game.
+This Pinball is based on the Mario Kart course Waluigi Pinball, the sprites are handmade and inspired from the elements of that game.
 
 # Controls
 - DOWN  Arrow: Launch Ball
