@@ -1,6 +1,7 @@
 # Physics-Pinball
 This Pinball is based on the Mario Kart course Waluigi Pinball, the sprites are handmade and inspired from the elements of that game.
 
+[GitHub link](https://github.com/PauFusco/Physics-Pinball)
 # Controls
 - DOWN  Arrow: Launch Ball
 - LEFT  Arrow: Left  Flipper
@@ -18,8 +19,6 @@ This minigame was made by:
   - Kaede Sato - Code
   - Dani Garcia - Code
   - Pau Fusco - Code
-  
-[GitHub link](https://github.com/PauFusco/Physics-Pinball)
 
 # Development issues
 While developing the project we run into some problems regarding interactions between the ball and some other objects.
