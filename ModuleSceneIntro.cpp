@@ -145,8 +145,11 @@ bool ModuleSceneIntro::Start()
 	SetPalletL();
 
 	SetLauncherFloor();
+<<<<<<< HEAD
 
 	combo = 0;
+=======
+>>>>>>> 299cb331b273afdf53e94ff0fab0ee75be689678
 
 	//App->audio->PlayMusic("Wahssets/Audio/Waluigi_Theme.ogg");
 
@@ -302,7 +305,10 @@ void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 			ApplyVectorImpulse(bodyA, bodyB);
 			score += 100;
 			App->audio->PlayFx(bonus_fx);
+<<<<<<< HEAD
 			Combo();
+=======
+>>>>>>> 299cb331b273afdf53e94ff0fab0ee75be689678
 			break;
 		case ColliderType::WALL:
 			despawn = true;

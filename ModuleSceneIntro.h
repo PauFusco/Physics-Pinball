@@ -76,10 +76,13 @@ public:
 	const char* lifesChar;
 	const char* prevChar;
 
+<<<<<<< HEAD
 	// Bumper combo activate
 	bool act[5] = { false, false, false, false, false };
 	int combo;
 
+=======
+>>>>>>> 299cb331b273afdf53e94ff0fab0ee75be689678
 	b2RevoluteJoint* m_jointR;
 	b2RevoluteJoint* m_jointL;
 
