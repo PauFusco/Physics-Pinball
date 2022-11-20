@@ -166,7 +166,8 @@ update_status ModuleSceneIntro::Update()
 	if (lifes < 0)
 	{
 		lifes = 3;
-		highScore = score;
+		if (highScore > score) highScore = score;
+		prevScore = score;
 		score = 0;
 	}
 
@@ -180,6 +181,8 @@ update_status ModuleSceneIntro::Update()
 	scoreChar = temp.c_str();
 	App->fonts->BlitText(0, 15, 0, scoreInd);
 	App->fonts->BlitText(50, 15, 0, scoreChar);
+
+
 
 	temp = to_string(lifes);
 	lifesChar = temp.c_str();

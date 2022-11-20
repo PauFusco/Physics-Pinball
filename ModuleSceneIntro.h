@@ -61,16 +61,19 @@ public:
 	// Points
 	int score = 0;
 	int highScore = 0;
+	int prevScore = 0;
 	
 	// Points as char
 	char* scoreInd = "SCORE ";
 	char* highInd =	 "HIGH ";
 	char* lifesInd = " X ";
+	char* prevInd = "PREV ";
 	
 	// Point text
 	const char* highChar;
 	const char* scoreChar;
 	const char* lifesChar;
+	const char* prevChar;
 
 	b2RevoluteJoint* m_jointR;
 	b2RevoluteJoint* m_jointL;
