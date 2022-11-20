@@ -146,10 +146,6 @@ bool ModuleSceneIntro::Start()
 
 	SetLauncherFloor();
 
-
-	combo = 0;
-
-
 	//App->audio->PlayMusic("Wahssets/Audio/Waluigi_Theme.ogg");
 
 	return ret;
@@ -274,26 +270,6 @@ update_status ModuleSceneIntro::Update()
 	return UPDATE_CONTINUE;
 }
 
-void ModuleSceneIntro::Combo() 
-{
-		if (combo < 5) {
-
-			bool(combo) = true;
-			combo++;
-
-			score += (combo * 10);
-
-		}
-
-		else if (combo == 5) {
-
-			combo = 0;
-
-		}
-	
-
-}
-
 void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 {
 	// Play Audio FX on every collision, regardless of who is colliding
@@ -304,7 +280,7 @@ void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 			ApplyVectorImpulse(bodyA, bodyB);
 			score += 100;
 			App->audio->PlayFx(bonus_fx);
-			Combo();
+			
 
 			break;
 		case ColliderType::WALL:
